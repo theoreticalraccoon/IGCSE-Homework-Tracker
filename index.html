@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IGCSE Homework Tracker</title>
+  <script>
+    /* Apply the saved theme before first paint so there's no flash. */
+    try {
+      document.documentElement.setAttribute("data-theme", localStorage.getItem("hw-theme") || "system");
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "system");
+    }
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f2f4f7;
+      --card: #ffffff;
+      --ink: #191c22;
+      --muted: #687183;
+      --line: #e4e7ec;
+      --line-soft: #eef0f4;
+      --pen: #2f4fc4;
+      /* blue pen = homework */
+      --pen-soft: #eef1fc;
+      --mark: #bb3a31;
+      /* red pen = assessments / urgent */
+      --mark-soft: #fbeeec;
+      --shadow: 0 1px 2px rgba(16, 20, 30, .05);
+      --shadow-lift: 0 4px 14px rgba(16, 20, 30, .08);
+    }
+
+    /* Dark palette — applied on explicit dark, or on system when the OS is dark. */
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #131519;
+      --card: #1c1f26;
+      --ink: #e8eaf0;
+      --muted: #98a1b3;
+      --line: #2a2e37;
+      --line-soft: #242832;
+      --pen: #9db1ff;
+      --pen-soft: #242c48;
+      --mark: #ef9a8f;
+      --mark-soft: #402a2a;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+      --shadow-lift: 0 4px 14px rgba(0, 0, 0, .4);
+    }
+
+    html[data-theme="system"] {
+      color-scheme: light dark;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html[data-theme="system"] {
+        --bg: #131519;
+        --card: #1c1f26;
+        --ink: #e8eaf0;
+        --muted: #98a1b3;
+        --line: #2a2e37;
+        --line-soft: #242832;
+        --pen: #9db1ff;
+        --pen-soft: #242c48;
+        --mark: #ef9a8f;
+        --mark-soft: #402a2a;
+        --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+        --shadow-lift: 0 4px 14px rgba(0, 0, 0, .4);
+      }
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      margin: 0
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      accent-color: var(--pen);
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 26px 20px 70px
+    }
+
+    /* Header */
+    .top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 16px
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 750;
+      letter-spacing: -.02em;
+      margin: 0
+    }
+
+    #summary {
+      font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto
+    }
+
+    #userArea {
+      display: flex;
+      align-items: center;
+      gap: 9px
+    }
+
+    .user-email {
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .icon-btn {
+      padding: 8px 11px;
+      font-size: 15px;
+      line-height: 1
+    }
+
+    /* Buttons */
+    button {
+      font: inherit;
+      color: inherit;
+      cursor: pointer
+    }
+
+    .btn-primary {
+      background: var(--pen);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 15px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(.94)
+    }
+
+    .btn-primary:disabled {
+      opacity: .55;
+      cursor: default;
+      filter: none
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 13px;
+      font-size: 13.5px;
+      color: var(--ink);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--muted)
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--pen);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
+    /* Tabs + controls */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
+      margin: 20px 0 22px
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px;
+      box-shadow: var(--shadow)
+    }
+
+    .tabs button {
+      border: none;
+      background: transparent;
+      border-radius: 999px;
+      padding: 7px 18px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .tabs button[aria-pressed="true"] {
+      background: var(--pen-soft);
+      color: var(--pen)
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13.5px;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none
+    }
+
+    .toggle input {
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      cursor: pointer
+    }
+
+    #clearDone {
+      margin-left: auto;
+      color: var(--muted)
+    }
+
+    #clearDone:hover {
+      color: var(--mark);
+      border-color: var(--mark)
+    }
+
+    /* Grid + cards */
+    #grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr))
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 13px 15px 13px 19px;
+      box-shadow: var(--shadow);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--line)
+    }
+
+    .card.spine-hw::before {
+      background: var(--pen)
+    }
+
+    .card.spine-as::before {
+      background: var(--mark)
+    }
+
+    .card.spine-both::before {
+      background: linear-gradient(var(--pen) 0 50%, var(--mark) 50% 100%)
+    }
+
+    .card header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px
+    }
+
+    .card h2 {
+      font-size: 15.5px;
+      font-weight: 650;
+      letter-spacing: -.01em;
+      margin: 0
+    }
+
+    .add-here {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 2px 4px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .add-here:hover {
+      color: var(--pen)
+    }
+
+    .eyebrow {
+      font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+      font-size: 10.5px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      margin: 12px 0 2px;
+    }
+
+    .eyebrow.homework {
+      color: var(--pen)
+    }
+
+    .eyebrow.assessment {
+      color: var(--mark)
+    }
+
+    .card ul {
+      list-style: none;
+      margin: 0;
+      padding: 0
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      align-items: start;
+      gap: 9px;
+      padding: 7px 0;
+    }
+
+    .item+.item {
+      border-top: 1px solid var(--line-soft)
+    }
+
+    .item input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      margin-top: 3px;
+      cursor: pointer
+    }
+
+    .item .txt {
+      font-size: 14px;
+      overflow-wrap: anywhere
+    }
+
+    .item.done .txt {
+      text-decoration: line-through;
+      color: var(--muted)
+    }
+
+    .item.done {
+      opacity: .65
+    }
+
+    .due {
+      font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+      font-size: 11.5px;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-top: 3px;
+    }
+
+    .due.overdue,
+    .due.today {
+      color: var(--mark);
+      font-weight: 700
+    }
+
+    .due.soon {
+      color: var(--ink);
+      font-weight: 600
+    }
+
+    .item.done .due {
+      color: var(--muted);
+      font-weight: 400
+    }
+
+    .del {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 6px;
+      opacity: 0;
+    }
+
+    .item:hover .del,
+    .item:focus-within .del {
+      opacity: 1
+    }
+
+    .del:hover {
+      color: var(--mark)
+    }
+
+    @media (hover:none) {
+      .del {
+        opacity: 1
+      }
+    }
+
+    .clear-msg {
+      margin: 10px 0 2px;
+      font-size: 13.5px;
+      color: var(--muted)
+    }
+
+    /* Overlays + modals */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(13, 16, 23, .45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .overlay[hidden] {
+      display: none
+    }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 22px;
+      width: min(430px, 100%);
+      max-height: min(88vh, 640px);
+      overflow: auto;
+      box-shadow: var(--shadow-lift);
+    }
+
+    .modal.wide {
+      width: min(560px, 100%)
+    }
+
+    .modal h2 {
+      margin: 0 0 16px;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -.01em
+    }
+
+    .field {
+      margin-bottom: 14px
+    }
+
+    .field[hidden] {
+      display: none
+    }
+
+    .field>span {
+      display: block;
+      margin-bottom: 6px;
+      font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+      font-size: 10.5px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    input[type="search"],
+    select {
+      width: 100%;
+      font: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+    }
+
+    .type-row {
+      display: flex;
+      gap: 8px;
+      position: relative
+    }
+
+    .type-row input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px
+    }
+
+    .type-chip {
+      flex: 1;
+      text-align: center;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .type-row input:checked+.type-chip.hw {
+      background: var(--pen-soft);
+      border-color: var(--pen);
+      color: var(--pen)
+    }
+
+    .type-row input:checked+.type-chip.as {
+      background: var(--mark-soft);
+      border-color: var(--mark);
+      color: var(--mark)
+    }
+
+    .type-row input:checked+.type-chip.neutral {
+      background: var(--pen-soft);
+      border-color: var(--pen);
+      color: var(--pen)
+    }
+
+    .type-row input:focus-visible+.type-chip {
+      outline: 2px solid var(--pen);
+      outline-offset: 2px
+    }
+
+    .chips {
+      display: flex;
+      gap: 6px;
+      margin-top: 7px
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: transparent;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .chip:hover {
+      color: var(--pen);
+      border-color: var(--pen)
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 18px
+    }
+
+    /* Subject picker (onboarding + settings) */
+    .subj-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+      max-height: 46vh;
+      overflow: auto;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--bg);
+    }
+
+    .subj {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      font-size: 13.5px;
+      color: var(--ink);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .subj input {
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      cursor: pointer;
+      flex: 0 0 auto
+    }
+
+    .subj.on {
+      border-color: var(--pen);
+      background: var(--pen-soft);
+      color: var(--pen);
+      font-weight: 600
+    }
+
+    .subj[hidden] {
+      display: none
+    }
+
+    .subj-count {
+      font-size: 12.5px;
+      color: var(--muted)
+    }
+
+    /* Auth + onboarding screens */
+    .auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px
+    }
+
+    .auth-screen[hidden] {
+      display: none
+    }
+
+    .auth-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 30px 28px;
+      width: min(400px, 100%);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .auth-card.onboard-card {
+      width: min(600px, 100%)
+    }
+
+    .auth-card h1 {
+      font-size: 23px;
+      margin: 0 0 5px
+    }
+
+    .auth-sub {
+      color: var(--muted);
+      font-size: 13.5px;
+      margin: 0 0 22px
+    }
+
+    .pw-wrap {
+      position: relative
+    }
+
+    .pw-wrap input {
+      padding-right: 56px
+    }
+
+    .pw-toggle {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 8px;
+      border-radius: 6px;
+    }
+
+    .pw-toggle:hover {
+      color: var(--pen)
+    }
+
+    .auth-submit {
+      width: 100%;
+      padding: 11px;
+      font-size: 15px;
+      margin-top: 6px
+    }
+
+    .auth-msg {
+      margin: 14px 0 0;
+      font-size: 13px;
+      min-height: 1em
+    }
+
+    .auth-msg.error {
+      color: var(--mark)
+    }
+
+    .auth-msg.ok {
+      color: var(--pen)
+    }
+
+    .auth-foot {
+      margin: 18px 0 0;
+      font-size: 13.5px;
+      color: var(--muted);
+      text-align: center
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--pen);
+      font-weight: 600;
+      padding: 0 2px;
+      cursor: pointer;
+      font-size: 13.5px
+    }
+
+    .link-btn:hover {
+      text-decoration: underline
+    }
+
+    .auth-forgot {
+      margin: 12px 0 0;
+      text-align: center;
+      font-size: 13px
+    }
+
+    .auth-forgot[hidden] {
+      display: none
+    }
+
+    .onboard-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: var(--bg);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      box-shadow: var(--shadow-lift);
+      z-index: 90;
+      max-width: 90vw;
+    }
+
+    .toast[hidden] {
+      display: none
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .card {
+        transition: box-shadow .15s ease
+      }
+
+      .card:hover {
+        box-shadow: var(--shadow-lift)
+      }
+
+      .del,
+      .btn-primary,
+      .btn-ghost,
+      .tabs button,
+      .type-chip,
+      .chip,
+      .subj {
+        transition: all .12s ease
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============ Sign in / Sign up ============ -->
+  <div class="auth-screen" id="authScreen" hidden>
+    <div class="auth-card">
+      <h1 id="authTitle">Sign in</h1>
+      <p class="auth-sub" id="authSub">Welcome back — pick up where you left off.</p>
+      <form id="authForm" novalidate>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" id="authEmail" autocomplete="email" autocapitalize="none" spellcheck="false"
+            placeholder="you@example.com">
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <span class="pw-wrap">
+            <input type="password" id="authPassword" autocomplete="current-password" placeholder="••••••••">
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">Show</button>
+          </span>
+        </label>
+        <button type="submit" class="btn-primary auth-submit" id="authSubmit">Sign in</button>
+        <p class="auth-msg" id="authMsg" role="status" aria-live="polite"></p>
+        <p class="auth-forgot" id="authForgotWrap">
+          <button type="button" class="link-btn" id="authForgot">Forgot your password?</button>
+        </p>
+      </form>
+      <p class="auth-foot" id="authFoot">
+        New here? <button type="button" class="link-btn" id="authSwitch">Create an account</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ Set a new password (from a reset link) ============ -->
+  <div class="auth-screen" id="recoveryScreen" hidden>
+    <div class="auth-card">
+      <h1>Set a new password</h1>
+      <p class="auth-sub">Choose a new password for your account.</p>
+      <form id="recoveryForm" novalidate>
+        <label class="field">
+          <span>New password</span>
+          <span class="pw-wrap">
+            <input type="password" id="recoveryPassword" autocomplete="new-password" placeholder="••••••••">
+            <button type="button" class="pw-toggle" id="recoveryPwToggle" aria-label="Show password">Show</button>
+          </span>
+        </label>
+        <button type="submit" class="btn-primary auth-submit" id="recoverySubmit">Update password</button>
+        <p class="auth-msg" id="recoveryMsg" role="status" aria-live="polite"></p>
+      </form>
+      <p class="auth-foot">
+        <button type="button" class="link-btn" id="recoveryCancel">Back to sign in</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ Pick subjects (first sign-in) ============ -->
+  <div class="auth-screen" id="onboardScreen" hidden>
+    <div class="auth-card onboard-card">
+      <h1>Choose your subjects</h1>
+      <p class="auth-sub">Pick the subjects you take — you can change these anytime in Settings.</p>
+      <input type="search" id="onboardSearch" placeholder="Search subjects…" autocomplete="off"
+        aria-label="Search subjects">
+      <div class="subj-grid" id="onboardGrid" style="margin-top:10px"></div>
+      <div class="onboard-foot">
+        <span class="subj-count" id="onboardCount">0 selected</span>
+        <button type="button" class="btn-primary" id="onboardContinue" disabled>Continue</button>
+      </div>
+      <p class="auth-msg" id="onboardMsg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- ============ Tracker ============ -->
+  <div class="wrap" id="appWrap" hidden>
+    <div class="top">
+      <h1>IGCSE Homework Tracker</h1>
+      <span id="summary" aria-live="polite">Loading…</span>
+      <div id="userArea">
+        <span class="user-email" id="userEmail"></span>
+        <button class="btn-ghost icon-btn" id="openSettings" aria-label="Settings" title="Settings">⚙</button>
+        <button class="btn-ghost" id="signOut">Sign out</button>
+      </div>
+      <button class="btn-primary" id="openAdd">Add task</button>
+    </div>
+
+    <div class="controls">
+      <div class="tabs" id="tabs" aria-label="School or tuition">
+        <button data-source="school" aria-pressed="true">School</button>
+        <button data-source="tuition" aria-pressed="false">Tuition</button>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="hideEmpty">
+        Hide subjects with nothing due
+      </label>
+      <button class="btn-ghost" id="clearDone" hidden>Clear completed</button>
+    </div>
+
+    <main id="grid"></main>
+  </div>
+
+  <!-- Add-task modal -->
+  <div class="overlay" id="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+      <h2 id="dialogTitle">Add a task</h2>
+      <form id="addForm">
+        <label class="field">
+          <span>Subject</span>
+          <select id="fSubject"></select>
+        </label>
+        <div class="field">
+          <span>From</span>
+          <div class="type-row">
+            <input type="radio" name="fsource" id="srcSchool" value="school" checked>
+            <label class="type-chip neutral" for="srcSchool">School</label>
+            <input type="radio" name="fsource" id="srcTuition" value="tuition">
+            <label class="type-chip neutral" for="srcTuition">Tuition</label>
+          </div>
+        </div>
+        <div class="field" id="typeField">
+          <span>Type</span>
+          <div class="type-row">
+            <input type="radio" name="ftype" id="typeHW" value="homework" checked>
+            <label class="type-chip hw" for="typeHW">Homework</label>
+            <input type="radio" name="ftype" id="typeAS" value="assessment">
+            <label class="type-chip as" for="typeAS">Assessment</label>
+          </div>
+        </div>
+        <label class="field">
+          <span>Task</span>
+          <input type="text" id="fText" placeholder="e.g. Textbook pg 41, Q1–9" autocomplete="off">
+        </label>
+        <label class="field">
+          <span>Due date (optional)</span>
+          <input type="date" id="fDue">
+        </label>
+        <div class="chips">
+          <button type="button" class="chip" data-days="0">Today</button>
+          <button type="button" class="chip" data-days="1">Tomorrow</button>
+          <button type="button" class="chip" data-days="7">Next week</button>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn-ghost" id="cancelAdd">Cancel</button>
+          <button type="submit" class="btn-primary">Add task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div class="overlay" id="settingsOverlay" hidden>
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <h2 id="settingsTitle">Settings</h2>
+      <div class="field">
+        <span>Appearance</span>
+        <div class="type-row" id="themeRow">
+          <input type="radio" name="theme" id="themeSystem" value="system">
+          <label class="type-chip neutral" for="themeSystem">System</label>
+          <input type="radio" name="theme" id="themeLight" value="light">
+          <label class="type-chip neutral" for="themeLight">Light</label>
+          <input type="radio" name="theme" id="themeDark" value="dark">
+          <label class="type-chip neutral" for="themeDark">Dark</label>
+        </div>
+      </div>
+      <div class="field">
+        <span>Your subjects</span>
+        <input type="search" id="settingsSearch" placeholder="Search subjects…" autocomplete="off"
+          aria-label="Search subjects">
+        <div class="subj-grid" id="settingsGrid" style="margin-top:8px"></div>
+        <span class="subj-count" id="settingsCount" style="display:block;margin-top:8px">0 selected</span>
+      </div>
+      <p class="auth-msg" id="settingsMsg" role="status" aria-live="polite"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn-ghost" id="cancelSettings">Cancel</button>
+        <button type="button" class="btn-primary" id="saveSettings">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    /* ======================================================================
+       CONFIG — your Supabase project. The publishable key is safe to expose
+       in the browser; data is protected by row-level security (see
+       supabase/migrations/…_init.sql).
+       ====================================================================== */
+    var SUPABASE_URL = "https://yfzlypcxsmlakpxkrtbu.supabase.co";
+    var SUPABASE_KEY = "sb_publishable_q9kbWXGMCrLKmg-1aqBCMQ_k-i2CR77";
+
+    /* The full catalogue people can pick from. */
+    var ALL_SUBJECTS = [
+      "Geography", "English Literature", "BTEC Sport", "Sinhala", "French",
+      "Single Science Physics", "Maths", "Further Pure Maths", "Commerce", "English Language",
+      "Physics", "Accounting", "ICT", "Computer Science", "Psychology", "Extra Maths",
+      "Human Biology", "Chemistry", "Single Science Chemistry", "History", "Art", "BTEC Music",
+      "Extra English", "Drama", "Single Science Biology", "Biology", "Economics", "Business"
+    ];
+    var PREFS_KEY = "homework-tracker-prefs-v1";
+    var THEME_KEY = "hw-theme";
+
+    var state = {
+      items: [],
+      subjects: [],   // this user's chosen subjects (from their profile)
+      prefs: { source: "school", hideEmpty: false, lastSubject: ALL_SUBJECTS[0] }
+    };
+    var loaded = false;
+    var sb = null;              // Supabase client
+    var currentUser = null;     // signed-in user or null
+    var currentTheme = "system";
+    var settingsSnapshot = null;
+
+    function $(id) { return document.getElementById(id); }
+    var grid, summary, overlay;
+    var lastFocus = null;
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+      });
+    }
+    function newId() {
+      return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : Date.now() + "-" + Math.random().toString(36).slice(2);
+    }
+
+    var toastTimer = null;
+    function toast(msg) {
+      var t = $("toast");
+      t.textContent = msg;
+      t.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.hidden = true; }, 3000);
+    }
+
+    /* ---------- Theme ---------- */
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+    function setTheme(theme) {
+      currentTheme = theme;
+      try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* ignore */ }
+      applyTheme(theme);
+    }
+
+    /* ---------- Normalisation ---------- */
+    function normalizeItem(i) {
+      var source = i.source === "tuition" ? "tuition" : "school";
+      var type = i.type === "assessment" ? "assessment" : "homework";
+      // Tuition has no assessments; fold any legacy ones into homework so nothing goes missing.
+      if (source === "tuition") type = "homework";
+      return {
+        id: i.id || newId(),
+        subject: ALL_SUBJECTS.indexOf(i.subject) >= 0 ? i.subject : ALL_SUBJECTS[0],
+        type: type,
+        source: source,
+        text: String(i.text || ""),
+        due: i.due || null,
+        done: !!i.done,
+        created: Number(i.created) || 0
+      };
+    }
+    function normalizePrefs(p) {
+      p = p || {};
+      return {
+        source: p.source === "tuition" ? "tuition" : "school",
+        hideEmpty: !!p.hideEmpty,
+        lastSubject: ALL_SUBJECTS.indexOf(p.lastSubject) >= 0 ? p.lastSubject : ALL_SUBJECTS[0]
+      };
+    }
+    function normalizeSubjects(arr) {
+      if (!Array.isArray(arr)) return [];
+      var set = {};
+      arr.forEach(function (s) { set[s] = true; });
+      return ALL_SUBJECTS.filter(function (s) { return set[s]; });   // keep catalogue order
+    }
+
+    /* ---------- Prefs (device-local; tasks & subjects live in Supabase) ---------- */
+    function loadPrefs() {
+      try {
+        var raw = localStorage.getItem(PREFS_KEY);
+        if (raw) state.prefs = normalizePrefs(JSON.parse(raw));
+      } catch (e) { /* ignore */ }
+    }
+    function savePrefs() {
+      try { localStorage.setItem(PREFS_KEY, JSON.stringify(state.prefs)); }
+      catch (e) { /* ignore */ }
+    }
+    // Sync the account-level prefs (which tab, hide-empty) to the profile, debounced.
+    var prefsRemoteTimer = null;
+    function savePrefsRemote() {
+      if (!sb || !currentUser) return;
+      clearTimeout(prefsRemoteTimer);
+      prefsRemoteTimer = setTimeout(function () {
+        sb.from("profiles").update({
+          prefs: { source: state.prefs.source, hideEmpty: state.prefs.hideEmpty },
+          updated_at: new Date().toISOString()
+        }).eq("id", currentUser.id).then(function (res) {
+          if (res.error) console.error("Prefs sync failed:", res.error);
+        });
+      }, 400);
+    }
+    function applyRemotePrefs(p) {
+      if (!p || typeof p !== "object") return;
+      if (p.source === "school" || p.source === "tuition") state.prefs.source = p.source;
+      if (typeof p.hideEmpty === "boolean") state.prefs.hideEmpty = p.hideEmpty;
+      savePrefs();   // cache on this device so the next load here is instant
+    }
+
+    /* ---------- Profile (chosen subjects) ---------- */
+    async function loadProfile() {
+      state.subjects = [];
+      var res = await sb.from("profiles").select("subjects,onboarded,prefs").eq("id", currentUser.id).maybeSingle();
+      if (res.error && /prefs/.test(res.error.message || "")) {
+        // Database predates the prefs column — still load subjects so the app works.
+        res = await sb.from("profiles").select("subjects,onboarded").eq("id", currentUser.id).maybeSingle();
+      }
+      if (res.error) {
+        console.error("Profile load failed:", res.error);
+        toast("Couldn't load your subjects.");
+        return;
+      }
+      if (res.data) {
+        state.subjects = normalizeSubjects(res.data.subjects || []);
+        applyRemotePrefs(res.data.prefs);
+      }
+    }
+    async function saveProfile(subjects) {
+      var clean = normalizeSubjects(subjects);
+      var res = await sb.from("profiles").upsert({
+        id: currentUser.id, subjects: clean, onboarded: true, updated_at: new Date().toISOString()
+      });
+      if (res.error) {
+        console.error("Profile save failed:", res.error);
+        return false;
+      }
+      state.subjects = clean;
+      return true;
+    }
+
+    /* ---------- Task data (Supabase) ---------- */
+    async function loadTasks() {
+      loaded = false;
+      state.items = [];
+      render();
+      var res = await sb.from("tasks").select("id,subject,type,source,text,due,done,created");
+      if (res.error) {
+        console.error("Load failed:", res.error);
+        summary.textContent = "Couldn't load tasks";
+        toast("Couldn't load your tasks — check your connection.");
+        return;
+      }
+      state.items = (res.data || []).map(normalizeItem);
+      loaded = true;
+      render();
+    }
+
+    async function addTask(fields) {
+      var item = normalizeItem({
+        id: newId(),
+        subject: fields.subject,
+        type: fields.type,
+        source: fields.source,
+        text: fields.text,
+        due: fields.due,
+        done: false,
+        created: Date.now()
+      });
+      state.items.push(item);           // optimistic
+      render();
+      // user_id is filled server-side by the column default auth.uid().
+      var res = await sb.from("tasks").insert({
+        id: item.id, subject: item.subject, type: item.type, source: item.source,
+        text: item.text, due: item.due, done: item.done, created: item.created
+      });
+      if (res.error) {
+        state.items = state.items.filter(function (i) { return i.id !== item.id; });
+        render();
+        console.error("Insert failed:", res.error);
+        toast("Couldn't save that task.");
+      }
+    }
+
+    async function setDone(id, done) {
+      var item = state.items.find(function (i) { return i.id === id; });
+      if (!item) return;
+      item.done = done;                 // optimistic
+      render();
+      var res = await sb.from("tasks").update({ done: done }).eq("id", id);
+      if (res.error) {
+        item.done = !done;              // roll back
+        render();
+        console.error("Update failed:", res.error);
+        toast("Couldn't update that task.");
+      }
+    }
+
+    async function deleteTask(id) {
+      var idx = state.items.findIndex(function (i) { return i.id === id; });
+      if (idx < 0) return;
+      var removed = state.items[idx];
+      state.items.splice(idx, 1);       // optimistic
+      render();
+      var res = await sb.from("tasks").delete().eq("id", id);
+      if (res.error) {
+        state.items.push(removed);      // roll back
+        render();
+        console.error("Delete failed:", res.error);
+        toast("Couldn't delete that task.");
+      }
+    }
+
+    async function clearCompleted() {
+      var src = state.prefs.source;
+      var removed = state.items.filter(function (i) { return i.done && i.source === src; });
+      if (!removed.length) return;
+      var ids = removed.map(function (i) { return i.id; });
+      state.items = state.items.filter(function (i) { return !(i.done && i.source === src); });
+      render();
+      var res = await sb.from("tasks").delete().in("id", ids);
+      if (res.error) {
+        state.items = state.items.concat(removed);   // roll back
+        render();
+        console.error("Clear failed:", res.error);
+        toast("Couldn't clear completed tasks.");
+      }
+    }
+
+    /* ---------- Dates ---------- */
+    function isoDate(dt) {
+      function p(n) { return String(n).length < 2 ? "0" + n : String(n); }
+      return dt.getFullYear() + "-" + p(dt.getMonth() + 1) + "-" + p(dt.getDate());
+    }
+    function dueLabel(d) {
+      if (!d) return null;
+      var today = new Date(); today.setHours(0, 0, 0, 0);
+      var parts = d.split("-").map(Number);
+      var dt = new Date(parts[0], parts[1] - 1, parts[2]);
+      var diff = Math.round((dt - today) / 86400000);
+      if (diff < 0) return { text: (-diff) + (diff === -1 ? " day overdue" : " days overdue"), cls: "overdue" };
+      if (diff === 0) return { text: "Today", cls: "today" };
+      if (diff === 1) return { text: "Tomorrow", cls: "soon" };
+      if (diff < 7) return { text: dt.toLocaleDateString(undefined, { weekday: "short" }), cls: "" };
+      return { text: dt.toLocaleDateString(undefined, { day: "numeric", month: "short" }), cls: "" };
+    }
+
+    /* ---------- Rendering ---------- */
+    function visibleSubjects() {
+      var src = state.prefs.source;
+      var withTasks = {};
+      state.items.forEach(function (i) { if (i.source === src) withTasks[i.subject] = true; });
+      var chosen = {};
+      state.subjects.forEach(function (s) { chosen[s] = true; });
+      // Chosen subjects always show; anything that already has tasks shows too, so nothing hides.
+      return ALL_SUBJECTS.filter(function (s) { return chosen[s] || withTasks[s]; });
+    }
+    function sortItems(a, b) {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      var ad = a.due || "9999-12-31", bd = b.due || "9999-12-31";
+      if (ad !== bd) return ad < bd ? -1 : 1;
+      return (a.created || 0) - (b.created || 0);
+    }
+    function itemHTML(i) {
+      var due = dueLabel(i.due);
+      return '<li class="item' + (i.done ? " done" : "") + '">'
+        + '<input type="checkbox" data-act="toggle" data-id="' + i.id + '"' + (i.done ? " checked" : "") + ' aria-label="Mark done">'
+        + '<span class="txt">' + esc(i.text) + '</span>'
+        + (due ? '<span class="due ' + due.cls + '">' + due.text + '</span>' : '<span></span>')
+        + '<button class="del" data-act="del" data-id="' + i.id + '" aria-label="Delete task">&times;</button>'
+        + '</li>';
+    }
+    function cardHTML(sub) {
+      var src = state.prefs.source;
+      var inTab = state.items.filter(function (i) { return i.subject === sub && i.source === src; });
+      // School shows homework + assessments; tuition shows homework only.
+      var types = src === "tuition" ? ["homework"] : ["homework", "assessment"];
+      var pendingVisible = inTab.filter(function (i) { return !i.done && types.indexOf(i.type) >= 0; });
+
+      if (state.prefs.hideEmpty && pendingVisible.length === 0) return "";
+
+      var hasHW = false, hasAS = false;
+      pendingVisible.forEach(function (i) {
+        if (i.type === "homework") hasHW = true; else hasAS = true;
+      });
+      var spine = hasHW && hasAS ? "both" : hasHW ? "hw" : hasAS ? "as" : "none";
+
+      var sections = "";
+      types.forEach(function (t) {
+        var items = inTab.filter(function (i) { return i.type === t; }).sort(sortItems);
+        if (!items.length) return;
+        sections += '<div><p class="eyebrow ' + t + '">' + (t === "homework" ? "Homework" : "Assessments") + '</p>'
+          + '<ul>' + items.map(itemHTML).join("") + '</ul></div>';
+      });
+      var body = sections || '<p class="clear-msg">All clear</p>';
+
+      return '<section class="card spine-' + spine + '">'
+        + '<header><h2>' + esc(sub) + '</h2>'
+        + '<button class="add-here" data-act="add" data-subject="' + esc(sub) + '">Add</button></header>'
+        + body + '</section>';
+    }
+    function render() {
+      if (!grid) return;
+      var src = state.prefs.source;
+      var pending = state.items.filter(function (i) { return !i.done && i.source === src; });
+      var hw = pending.filter(function (i) { return i.type === "homework"; }).length;
+      var as = pending.length - hw;
+
+      if (!loaded && state.items.length === 0) {
+        summary.textContent = "Loading…";
+      } else if (pending.length === 0) {
+        summary.textContent = state.items.some(function (i) { return i.source === src; })
+          ? "Nothing pending" : "No tasks yet — add your first one";
+      } else if (src === "tuition") {
+        summary.textContent = hw + (hw === 1 ? " homework task" : " homework tasks");
+      } else {
+        summary.textContent = hw + " homework · " + as + (as === 1 ? " assessment" : " assessments");
+      }
+
+      document.querySelectorAll("#tabs button").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.getAttribute("data-source") === src));
+      });
+      $("hideEmpty").checked = state.prefs.hideEmpty;
+      $("clearDone").hidden = !state.items.some(function (i) { return i.done && i.source === src; });
+
+      grid.innerHTML = visibleSubjects().map(cardHTML).join("");
+    }
+
+    /* ---------- Subject picker helpers ---------- */
+    function checkedSubjects(gridEl) {
+      var vals = {};
+      gridEl.querySelectorAll('input[type="checkbox"]:checked').forEach(function (cb) { vals[cb.value] = true; });
+      return ALL_SUBJECTS.filter(function (s) { return vals[s]; });
+    }
+    function updateCount(gridEl, countEl) {
+      var n = gridEl.querySelectorAll('input[type="checkbox"]:checked').length;
+      countEl.textContent = n + " selected";
+    }
+    function buildChecklist(gridEl, countEl, selected) {
+      var set = {};
+      (selected || []).forEach(function (s) { set[s] = true; });
+      gridEl.innerHTML = ALL_SUBJECTS.map(function (s) {
+        var on = set[s];
+        return '<label class="subj' + (on ? " on" : "") + '" data-subject="' + esc(s) + '">'
+          + '<input type="checkbox" value="' + esc(s) + '"' + (on ? " checked" : "") + '>'
+          + '<span>' + esc(s) + '</span></label>';
+      }).join("");
+      updateCount(gridEl, countEl);
+    }
+    function filterChecklist(gridEl, query) {
+      var q = query.trim().toLowerCase();
+      gridEl.querySelectorAll(".subj").forEach(function (l) {
+        var s = l.getAttribute("data-subject").toLowerCase();
+        l.hidden = q && s.indexOf(q) < 0;
+      });
+    }
+
+    /* ---------- Add-task modal ---------- */
+    function populateSubjectDropdown() {
+      var list = state.subjects.length ? state.subjects : ALL_SUBJECTS;
+      $("fSubject").innerHTML = list.map(function (s) { return "<option>" + esc(s) + "</option>"; }).join("");
+      if (list.indexOf(state.prefs.lastSubject) < 0) state.prefs.lastSubject = list[0];
+    }
+    function syncTypeField() {
+      var tuition = $("srcTuition").checked;
+      $("typeField").hidden = tuition;
+      if (tuition) $("typeHW").checked = true; // tuition is always homework
+    }
+    function openDialog(subject) {
+      var want = subject || state.prefs.lastSubject;
+      var sel = $("fSubject");
+      // If the subject isn't in the list (e.g. a deselected subject that still has tasks), add it for this add.
+      if (want && !Array.prototype.some.call(sel.options, function (o) { return o.value === want; })) {
+        sel.insertAdjacentHTML("afterbegin", "<option>" + esc(want) + "</option>");
+      }
+      sel.value = want;
+      if (state.prefs.source === "tuition") $("srcTuition").checked = true;
+      else $("srcSchool").checked = true;
+      $("typeHW").checked = true;
+      syncTypeField();
+      $("fText").value = "";
+      $("fDue").value = "";
+      lastFocus = document.activeElement;
+      overlay.hidden = false;
+      document.body.style.overflow = "hidden";
+      $("fText").focus();
+    }
+    function closeDialog() {
+      overlay.hidden = true;
+      document.body.style.overflow = "";
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    /* ---------- Settings modal ---------- */
+    function openSettings() {
+      settingsSnapshot = { theme: currentTheme, subjects: state.subjects.slice() };
+      var themeId = { system: "themeSystem", light: "themeLight", dark: "themeDark" }[currentTheme] || "themeSystem";
+      $(themeId).checked = true;
+      $("settingsSearch").value = "";
+      $("settingsMsg").textContent = "";
+      buildChecklist($("settingsGrid"), $("settingsCount"), state.subjects);
+      $("saveSettings").disabled = false;
+      $("saveSettings").textContent = "Save";
+      lastFocus = document.activeElement;
+      $("settingsOverlay").hidden = false;
+      document.body.style.overflow = "hidden";
+    }
+    function closeSettings(revertTheme) {
+      if (revertTheme && settingsSnapshot) applyTheme(settingsSnapshot.theme);
+      $("settingsOverlay").hidden = true;
+      document.body.style.overflow = "";
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    /* ---------- Screens ---------- */
+    function showScreen(name) {
+      $("authScreen").hidden = name !== "auth";
+      $("onboardScreen").hidden = name !== "onboard";
+      $("appWrap").hidden = name !== "app";
+      $("recoveryScreen").hidden = name !== "recovery";
+    }
+
+    /* ======================================================================
+       AUTH
+       ====================================================================== */
+    var authMode = "signin";           // "signin" | "signup"
+
+    function setAuthMsg(text, kind) {
+      var el = $("authMsg");
+      el.textContent = text || "";
+      el.className = "auth-msg" + (kind ? " " + kind : "");
+    }
+    function setAuthBusy(busy) {
+      $("authSubmit").disabled = busy;
+      $("authSubmit").textContent = busy
+        ? (authMode === "signup" ? "Creating…" : "Signing in…")
+        : (authMode === "signup" ? "Create account" : "Sign in");
+    }
+    function applyAuthMode() {
+      var up = authMode === "signup";
+      $("authTitle").textContent = up ? "Create your account" : "Sign in";
+      $("authSub").textContent = up
+        ? "One quick step and you're in — you'll stay signed in on this device."
+        : "Welcome back — pick up where you left off.";
+      $("authSubmit").textContent = up ? "Create account" : "Sign in";
+      $("authPassword").setAttribute("autocomplete", up ? "new-password" : "current-password");
+      $("authFoot").innerHTML = up
+        ? 'Already have an account? <button type="button" class="link-btn" id="authSwitch">Sign in</button>'
+        : 'New here? <button type="button" class="link-btn" id="authSwitch">Create an account</button>';
+      $("authSwitch").addEventListener("click", toggleAuthMode);
+      $("authForgotWrap").hidden = up;   // reset is only for existing accounts
+      setAuthMsg("");
+    }
+    function toggleAuthMode() {
+      authMode = authMode === "signup" ? "signin" : "signup";
+      applyAuthMode();
+      $("authEmail").focus();
+    }
+    function friendlyAuthError(err) {
+      var m = (err && err.message ? err.message : String(err)).toLowerCase();
+      if (m.indexOf("invalid login") >= 0) return "That email and password don't match.";
+      if (m.indexOf("already registered") >= 0 || m.indexOf("already been registered") >= 0)
+        return "That email already has an account — try signing in instead.";
+      if (m.indexOf("email not confirmed") >= 0) return "Please confirm your email first — check your inbox.";
+      if (m.indexOf("password should be at least") >= 0) return "Use a password of at least 6 characters.";
+      if (m.indexOf("unable to validate email") >= 0 || m.indexOf("invalid email") >= 0) return "That email doesn't look right.";
+      if (m.indexOf("signups not allowed") >= 0) return "Sign-ups are turned off for this project.";
+      if (m.indexOf("rate limit") >= 0 || m.indexOf("too many") >= 0) return "Too many attempts — wait a moment and try again.";
+      return err && err.message ? err.message : "Something went wrong. Please try again.";
+    }
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      var email = $("authEmail").value.trim();
+      var password = $("authPassword").value;
+      if (!email) { setAuthMsg("Enter your email.", "error"); $("authEmail").focus(); return; }
+      if (!password) { setAuthMsg("Enter your password.", "error"); $("authPassword").focus(); return; }
+      if (authMode === "signup" && password.length < 6) {
+        setAuthMsg("Use a password of at least 6 characters.", "error"); return;
+      }
+      setAuthBusy(true);
+      setAuthMsg("");
+      try {
+        if (authMode === "signup") {
+          var r = await sb.auth.signUp({ email: email, password: password });
+          if (r.error) throw r.error;
+          if (r.data && r.data.session) {
+            // Email confirmation is off → we're signed in. onAuthStateChange takes over.
+          } else {
+            setAuthMsg("Account created! Check your email to confirm, then sign in.", "ok");
+            authMode = "signin";
+            applyAuthMode();
+          }
+        } else {
+          var s = await sb.auth.signInWithPassword({ email: email, password: password });
+          if (s.error) throw s.error;
+          // onAuthStateChange takes over.
+        }
+      } catch (err) {
+        setAuthMsg(friendlyAuthError(err), "error");
+      } finally {
+        setAuthBusy(false);
+      }
+    }
+    function showAuth() {
+      showScreen("auth");
+      currentUser = null;
+      state.items = [];
+      state.subjects = [];
+      loaded = false;
+      document.body.style.overflow = "";
+      if (!overlay.hidden) closeDialog();
+      if (!$("settingsOverlay").hidden) closeSettings(false);
+      setTimeout(function () { $("authEmail").focus(); }, 0);
+    }
+    async function showApp(user) {
+      currentUser = user;
+      $("userEmail").textContent = user.email || "";
+      $("userEmail").title = user.email || "";
+      $("authPassword").value = "";
+      await loadProfile();
+      if (state.subjects.length === 0) showOnboarding();
+      else showTracker();
+    }
+    function showTracker() {
+      showScreen("app");
+      populateSubjectDropdown();
+      render();
+      loadTasks();
+    }
+
+    /* ---------- Onboarding ---------- */
+    function showOnboarding() {
+      showScreen("onboard");
+      $("onboardSearch").value = "";
+      $("onboardMsg").textContent = "";
+      buildChecklist($("onboardGrid"), $("onboardCount"), state.subjects);
+      $("onboardContinue").disabled = checkedSubjects($("onboardGrid")).length === 0;
+    }
+
+    /* ---------- Password reset ---------- */
+    var recoveryActive = false;
+    function cleanUrl() {
+      try { history.replaceState(null, "", window.location.pathname + window.location.search); }
+      catch (e) { /* ignore */ }
+    }
+    function wirePwToggle(btnId, inputId) {
+      $(btnId).addEventListener("click", function () {
+        var p = $(inputId);
+        var show = p.type === "password";
+        p.type = show ? "text" : "password";
+        this.textContent = show ? "Hide" : "Show";
+        this.setAttribute("aria-label", show ? "Hide password" : "Show password");
+        p.focus();
+      });
+    }
+    async function handleForgot() {
+      var email = $("authEmail").value.trim();
+      if (!email) {
+        setAuthMsg("Enter your email above, then tap “Forgot your password”.", "error");
+        $("authEmail").focus();
+        return;
+      }
+      var btn = $("authForgot");
+      btn.disabled = true;
+      setAuthMsg("");
+      try {
+        var redirect = window.location.href.split("#")[0].split("?")[0];
+        var res = await sb.auth.resetPasswordForEmail(email, { redirectTo: redirect });
+        if (res.error) throw res.error;
+        setAuthMsg("If that email has an account, a reset link is on its way — check your inbox.", "ok");
+      } catch (err) {
+        setAuthMsg(friendlyAuthError(err), "error");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    function setRecoveryMsg(text, kind) {
+      var el = $("recoveryMsg");
+      el.textContent = text || "";
+      el.className = "auth-msg" + (kind ? " " + kind : "");
+    }
+    function showRecovery() {
+      recoveryActive = true;
+      showScreen("recovery");
+      $("recoveryPassword").value = "";
+      setRecoveryMsg("");
+      document.body.style.overflow = "";
+      setTimeout(function () { $("recoveryPassword").focus(); }, 0);
+    }
+    async function handleRecoverySubmit(e) {
+      e.preventDefault();
+      var pw = $("recoveryPassword").value;
+      if (pw.length < 6) { setRecoveryMsg("Use a password of at least 6 characters.", "error"); return; }
+      var btn = $("recoverySubmit");
+      btn.disabled = true; btn.textContent = "Updating…";
+      try {
+        var res = await sb.auth.updateUser({ password: pw });
+        if (res.error) throw res.error;
+        recoveryActive = false;
+        cleanUrl();
+        toast("Password updated.");
+        var user = res.data && res.data.user ? res.data.user : currentUser;
+        if (user) showApp(user); else showAuth();
+      } catch (err) {
+        setRecoveryMsg(friendlyAuthError(err), "error");
+        btn.disabled = false; btn.textContent = "Update password";
+      }
+    }
+
+    /* ======================================================================
+       WIRING
+       ====================================================================== */
+    function boot() {
+      grid = $("grid"); summary = $("summary"); overlay = $("overlay");
+
+      $("openAdd").addEventListener("click", function () { openDialog(); });
+      $("cancelAdd").addEventListener("click", closeDialog);
+      overlay.addEventListener("click", function (e) { if (e.target === overlay) closeDialog(); });
+
+      $("srcSchool").addEventListener("change", syncTypeField);
+      $("srcTuition").addEventListener("change", syncTypeField);
+
+      $("addForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var text = $("fText").value.trim();
+        if (!text) { $("fText").focus(); return; }
+        var subject = $("fSubject").value || (state.subjects[0] || ALL_SUBJECTS[0]);
+        var source = $("srcTuition").checked ? "tuition" : "school";
+        var type = (source === "tuition") ? "homework" : ($("typeAS").checked ? "assessment" : "homework");
+        addTask({ subject: subject, type: type, source: source, text: text, due: $("fDue").value || null });
+        state.prefs.lastSubject = subject;
+        savePrefs();
+        closeDialog();
+      });
+
+      document.querySelectorAll(".chip").forEach(function (c) {
+        c.addEventListener("click", function () {
+          var d = new Date();
+          d.setDate(d.getDate() + Number(c.getAttribute("data-days")));
+          $("fDue").value = isoDate(d);
+        });
+      });
+
+      $("tabs").addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-source]");
+        if (!b) return;
+        state.prefs.source = b.getAttribute("data-source");
+        savePrefs(); savePrefsRemote(); render();
+      });
+
+      $("hideEmpty").addEventListener("change", function (e) {
+        state.prefs.hideEmpty = e.target.checked;
+        savePrefs(); savePrefsRemote(); render();
+      });
+
+      $("clearDone").addEventListener("click", clearCompleted);
+
+      grid.addEventListener("click", function (e) {
+        var el = e.target.closest("[data-act]");
+        if (!el) return;
+        var act = el.getAttribute("data-act");
+        if (act === "add") openDialog(el.getAttribute("data-subject"));
+        else if (act === "del") deleteTask(el.getAttribute("data-id"));
+      });
+      grid.addEventListener("change", function (e) {
+        var el = e.target.closest('input[data-act="toggle"]');
+        if (!el) return;
+        setDone(el.getAttribute("data-id"), el.checked);
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          if (!overlay.hidden) { closeDialog(); return; }
+          if (!$("settingsOverlay").hidden) { closeSettings(true); return; }
+        }
+        if (e.key !== "a" || e.metaKey || e.ctrlKey || e.altKey) return;
+        if ($("appWrap").hidden || !overlay.hidden || !$("settingsOverlay").hidden) return;
+        var t = document.activeElement && document.activeElement.tagName;
+        if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT") return;
+        e.preventDefault();
+        openDialog();
+      });
+    }
+
+    function initAuth() {
+      $("authForm").addEventListener("submit", handleAuthSubmit);
+      $("authSwitch").addEventListener("click", toggleAuthMode);
+      $("authForgot").addEventListener("click", handleForgot);
+      wirePwToggle("pwToggle", "authPassword");
+      wirePwToggle("recoveryPwToggle", "recoveryPassword");
+      $("recoveryForm").addEventListener("submit", handleRecoverySubmit);
+      $("recoveryCancel").addEventListener("click", async function () {
+        recoveryActive = false;
+        cleanUrl();
+        try { await sb.auth.signOut(); } catch (e) { /* ignore */ }
+        showAuth();
+      });
+      $("signOut").addEventListener("click", async function () {
+        try { await sb.auth.signOut(); } catch (e) { /* onAuthStateChange still fires */ }
+      });
+      applyAuthMode();
+
+      sb.auth.onAuthStateChange(function (event, session) {
+        if (event === "PASSWORD_RECOVERY") { showRecovery(); return; }
+        if (recoveryActive) return;   // stay on the reset screen until they finish or cancel
+        if (session && session.user) {
+          if (!currentUser || currentUser.id !== session.user.id) showApp(session.user);
+        } else {
+          showAuth();
+        }
+      });
+    }
+
+    function initOnboarding() {
+      $("onboardSearch").addEventListener("input", function () { filterChecklist($("onboardGrid"), this.value); });
+      $("onboardGrid").addEventListener("change", function (e) {
+        var cb = e.target.closest('input[type="checkbox"]'); if (!cb) return;
+        var label = cb.closest(".subj"); if (label) label.classList.toggle("on", cb.checked);
+        updateCount($("onboardGrid"), $("onboardCount"));
+        $("onboardContinue").disabled = checkedSubjects($("onboardGrid")).length === 0;
+      });
+      $("onboardContinue").addEventListener("click", async function () {
+        var subs = checkedSubjects($("onboardGrid"));
+        if (!subs.length) return;
+        this.disabled = true; this.textContent = "Saving…";
+        var ok = await saveProfile(subs);
+        if (ok) {
+          this.textContent = "Continue";
+          showTracker();
+        } else {
+          this.disabled = false; this.textContent = "Continue";
+          $("onboardMsg").textContent = "Couldn't save — check your connection and try again.";
+          $("onboardMsg").className = "auth-msg error";
+        }
+      });
+    }
+
+    function initSettings() {
+      $("openSettings").addEventListener("click", openSettings);
+      $("cancelSettings").addEventListener("click", function () { closeSettings(true); });
+      $("settingsOverlay").addEventListener("click", function (e) { if (e.target === this) closeSettings(true); });
+      $("settingsSearch").addEventListener("input", function () { filterChecklist($("settingsGrid"), this.value); });
+      $("themeRow").addEventListener("change", function (e) {
+        var r = e.target.closest('input[name="theme"]'); if (!r) return;
+        applyTheme(r.value);   // live preview; persisted only on Save
+      });
+      $("settingsGrid").addEventListener("change", function (e) {
+        var cb = e.target.closest('input[type="checkbox"]'); if (!cb) return;
+        var label = cb.closest(".subj"); if (label) label.classList.toggle("on", cb.checked);
+        updateCount($("settingsGrid"), $("settingsCount"));
+      });
+      $("saveSettings").addEventListener("click", async function () {
+        var subs = checkedSubjects($("settingsGrid"));
+        if (!subs.length) {
+          $("settingsMsg").textContent = "Pick at least one subject.";
+          $("settingsMsg").className = "auth-msg error";
+          return;
+        }
+        var chosenTheme = (document.querySelector('input[name="theme"]:checked') || {}).value || "system";
+        this.disabled = true; this.textContent = "Saving…";
+        var ok = await saveProfile(subs);
+        if (!ok) {
+          this.disabled = false; this.textContent = "Save";
+          $("settingsMsg").textContent = "Couldn't save your subjects — check your connection.";
+          $("settingsMsg").className = "auth-msg error";
+          return;
+        }
+        setTheme(chosenTheme);
+        closeSettings(false);
+        populateSubjectDropdown();
+        render();
+        toast("Settings saved.");
+      });
+    }
+
+    /* ======================================================================
+       START
+       ====================================================================== */
+    (function start() {
+      try { currentTheme = localStorage.getItem(THEME_KEY) || "system"; } catch (e) { currentTheme = "system"; }
+      applyTheme(currentTheme);
+      loadPrefs();
+      boot();
+      initOnboarding();
+      initSettings();
+
+      if (!window.supabase || !window.supabase.createClient) {
+        showScreen("auth");
+        setAuthMsg("Couldn't load the sign-in service. Check your connection and refresh.", "error");
+        return;
+      }
+
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+          persistSession: true,       // remember the session across reloads/restarts
+          autoRefreshToken: true,     // keep it alive so people stay signed in
+          detectSessionInUrl: true,
+          storageKey: "hw-tracker-auth"
+        }
+      });
+
+      initAuth();
+
+      var isRecovery = /type=recovery/.test(window.location.hash) || /type=recovery/.test(window.location.search);
+      sb.auth.getSession().then(function (res) {
+        if (recoveryActive) return;   // a PASSWORD_RECOVERY event already routed us
+        var session = res && res.data ? res.data.session : null;
+        if (isRecovery && session) { showRecovery(); return; }
+        if (session && session.user) showApp(session.user);
+        else showAuth();
+      }).catch(function () { if (!recoveryActive) showAuth(); });
+    })();
+  </script>
+</body>
+
+</html>

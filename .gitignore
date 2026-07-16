@@ -1,0 +1,12 @@
+# Local env / secrets — never commit these
+.env
+.env.*
+*.local
+supabase/.temp/
+supabase/.branches/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
