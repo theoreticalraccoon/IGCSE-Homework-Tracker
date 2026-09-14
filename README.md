@@ -4,8 +4,6 @@ The app (`index.html`) now signs people in and saves each person's homework to y
 Supabase project. Everything is already wired up in the code — you just need to do
 **two quick things in the Supabase dashboard** the first time.
 
-Your project: https://yfzlypcxsmlakpxkrtbu.supabase.co
-
 ---
 
 ## 1. Create the database table  *(required)*
