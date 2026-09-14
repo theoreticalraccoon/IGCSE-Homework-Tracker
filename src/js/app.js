@@ -15,23 +15,19 @@ import { initTheme } from "./theme.js";
 import { defineRoute, setOutlet, startRouter, navigate, handleRoute } from "./router.js";
 import { renderAuth, renderRecovery, renderOnboarding } from "./views/auth.js";
 
-import * as today from "./views/today.js";
 import * as planner from "./views/planner.js";
-import * as calendar from "./views/calendar.js";
-import * as ask from "./views/ask.js";
-import * as mark from "./views/mark.js";
+import * as assistant from "./views/assistant.js";
 import * as mock from "./views/mock.js";
-import * as library from "./views/library.js";
+import * as markpaper from "./views/markpaper.js";
+import * as papers from "./views/papers.js";
 import * as progress from "./views/progress.js";
 import * as settings from "./views/settings.js";
 
-defineRoute("today", today);
 defineRoute("planner", planner);
-defineRoute("calendar", calendar);
-defineRoute("ask", ask);
-defineRoute("mark", mark);
+defineRoute("assistant", assistant);
 defineRoute("mock", mock);
-defineRoute("library", library);
+defineRoute("markpaper", markpaper);
+defineRoute("papers", papers);
 defineRoute("progress", progress);
 defineRoute("settings", settings);
 

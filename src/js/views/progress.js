@@ -53,7 +53,7 @@ export async function render(container, { query = {} } = {}) {
   on(root, "click", "[data-goto]", (_, btn) => navigate(btn.dataset.goto));
   on(root, "click", "[data-attempt]", (_, btn) => showAttempt(btn.dataset.attempt));
   on(root, "click", "[data-drill]", (_, btn) =>
-    navigate(`library?subject=${encodeURIComponent(btn.dataset.subject)}`)
+    navigate("markpaper")
   );
   on(root, "click", "[data-mock-weak]", () => navigate("mock"));
   on(root, "click", "[data-revise]", async (_, btn) => {
@@ -93,7 +93,7 @@ async function load() {
       icon: "📈",
       title: "Nothing marked yet",
       message: "Answer a past question and have it marked — your topic profile builds itself from there.",
-      action: `<button class="btn-primary" data-goto="mark">Mark an answer</button>`,
+      action: `<button class="btn-primary" data-goto="assistant">Mark an answer</button>`,
     });
     return;
   }

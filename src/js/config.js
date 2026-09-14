@@ -22,16 +22,19 @@ export const STORAGE = {
 };
 
 /** Subject tabs in the planner. */
+/** Where the work came from. The planner has always had exactly these two. */
 export const SOURCES = [
   { id: "school", label: "School" },
   { id: "tuition", label: "Tuition" },
-  { id: "self", label: "Self-study" },
 ];
 
+/**
+ * Blue pen for your own homework, red pen for anything an examiner sees.
+ * Tuition has no assessments, which the add-task form reflects.
+ */
 export const TASK_TYPES = [
   { id: "homework", label: "Homework" },
   { id: "assessment", label: "Assessment" },
-  { id: "revision", label: "Revision" },
 ];
 
 export const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

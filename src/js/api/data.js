@@ -198,6 +198,19 @@ export async function getChunk(id) {
   return data;
 }
 
+/** Question papers for a subject that actually have questions stored. */
+export async function listPapers(subject) {
+  const { data, error } = await sb
+    .from("papers")
+    .select("id,title,code,year,session,paper_no,variant,kind")
+    .eq("subject_code", subject)
+    .eq("kind", "qp")
+    .order("year", { ascending: false })
+    .order("paper_no");
+  fail("Could not load papers", error);
+  return data ?? [];
+}
+
 export async function subjectTopics(subject) {
   const { data, error } = await sb.rpc("subject_topics", { p_subject: subject });
   fail("Could not load topics", error);

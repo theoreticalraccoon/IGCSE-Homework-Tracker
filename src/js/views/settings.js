@@ -1,44 +1,29 @@
 /**
- * Settings — subjects, tuition timetable, appearance, AI allowance, account.
+ * Settings — subjects, appearance, allowance, account.
  *
- * The AI allowance panel is deliberately visible rather than hidden until it
- * runs out: the app runs on a free Gemini tier shared across everyone using
- * the deployment, and a student who can see the budget can spend it well.
+ * The allowance is shown rather than hidden until it runs out: Markwise runs on
+ * a free Gemini tier shared by everyone on the deployment, and a student who
+ * can see the budget spends it better than one who hits a wall.
  */
 
 import { esc, on, debounce } from "../ui/dom.js";
 import { toast, confirmModal, openModal, closeModal, spinner } from "../ui/feedback.js";
-import { store, subjectName, coverageFor } from "../store.js";
-import { saveProfile, loadUsage, loadTuition, createTuition, deleteTuition } from "../api/data.js";
+import { store, coverageFor } from "../store.js";
+import { saveProfile, loadUsage } from "../api/data.js";
 import { sb } from "../api/client.js";
 import { applyTheme, currentTheme } from "../theme.js";
-import { WEEKDAYS } from "../config.js";
-import { formatTime } from "../lib/dates.js";
 import { invalidate as invalidatePlanner } from "./planner.js";
+import { navigate } from "../router.js";
 
 let root = null;
 
 export async function render(container) {
   root = container;
   container.innerHTML = `
-    <header class="view-head">
-      <div><h1>Settings</h1></div>
-    </header>
+    <header class="view-head"><div><h1>Settings</h1></div></header>
 
     <section class="card plain">
-      <header><h2>Appearance</h2></header>
-      <div class="chip-row" id="themeRow">
-        ${["system", "light", "dark"].map((t) => `
-          <input type="radio" name="theme" id="theme-${t}" value="${t}" ${currentTheme() === t ? "checked" : ""}>
-          <label class="chip-toggle" for="theme-${t}">${t[0].toUpperCase()}${t.slice(1)}</label>`).join("")}
-      </div>
-    </section>
-
-    <section class="card plain">
-      <header>
-        <h2>Your subjects</h2>
-        <span class="muted" id="subjCount"></span>
-      </header>
+      <header><h2>Your subjects</h2><span class="muted" id="subjCount"></span></header>
       <input type="search" id="subjSearch" placeholder="Search subjects…" autocomplete="off">
       <div class="subj-grid" id="subjGrid"></div>
       <div class="card-actions">
@@ -47,33 +32,23 @@ export async function render(container) {
     </section>
 
     <section class="card plain">
-      <header>
-        <h2>Exam series</h2>
-      </header>
-      <label class="field">
-        <span>Which series are you sitting?</span>
-        <input type="text" id="examSession" placeholder="e.g. Jun 2027"
-               value="${esc(store.profile?.exam_session ?? "")}">
-      </label>
-      <div class="card-actions">
-        <button class="btn-ghost" id="saveSession">Save</button>
+      <header><h2>Appearance</h2></header>
+      <div class="chip-row" id="themeRow">
+        ${["system", "light", "dark"].map((t) => `
+          <input type="radio" name="theme" id="theme-${t}" value="${t}"${currentTheme() === t ? " checked" : ""}>
+          <label class="chip-toggle" for="theme-${t}">${t[0].toUpperCase()}${t.slice(1)}</label>`).join("")}
       </div>
     </section>
 
     <section class="card plain">
       <header>
-        <h2>Tuition timetable</h2>
-        <button class="btn-ghost small" id="addTuition">Add session</button>
+        <h2>What you can do today</h2>
+        <button class="link-btn" data-goto="papers">Add papers</button>
       </header>
-      <div id="tuitionList"></div>
-    </section>
-
-    <section class="card plain">
-      <header><h2>AI allowance today</h2></header>
       <div id="usagePanel">${spinner("Checking…")}</div>
       <p class="field-hint">
-        Markwise runs on Gemini's free tier. Limits reset at midnight UTC and exist so
-        one heavy session does not exhaust the quota for everyone on this deployment.
+        Markwise runs on a free AI allowance that resets every night, so that one heavy
+        session doesn't use up everyone else's.
       </p>
     </section>
 
@@ -88,10 +63,12 @@ export async function render(container) {
 
   wire();
   paintSubjects();
-  await Promise.all([paintUsage(), paintTuition()]);
+  await paintUsage();
 }
 
 function wire() {
+  on(root, "click", "[data-goto]", (_, btn) => navigate(btn.dataset.goto));
+
   root.querySelector("#themeRow").addEventListener("change", (e) => {
     const radio = e.target.closest('input[name="theme"]');
     if (radio) applyTheme(radio.value, { persist: true });
@@ -99,7 +76,12 @@ function wire() {
 
   root.querySelector("#subjSearch").addEventListener(
     "input",
-    debounce((e) => filterSubjects(e.target.value), 150),
+    debounce((e) => {
+      const q = e.target.value.trim().toLowerCase();
+      root.querySelectorAll("#subjGrid .subj").forEach((el) => {
+        el.hidden = q && !el.dataset.name.includes(q);
+      });
+    }, 150),
   );
 
   on(root, "change", "#subjGrid input", (_, cb) => {
@@ -128,39 +110,17 @@ function wire() {
     }
   });
 
-  root.querySelector("#saveSession").addEventListener("click", async () => {
-    try {
-      await saveProfile({ exam_session: root.querySelector("#examSession").value.trim() || null });
-      toast("Saved.");
-    } catch (e) {
-      toast(e.message, "error");
-    }
-  });
-
-  root.querySelector("#addTuition").addEventListener("click", openTuitionForm);
-
-  on(root, "click", "[data-del-tuition]", async (_, btn) => {
-    try {
-      await deleteTuition(btn.dataset.delTuition);
-      paintTuition();
-    } catch (e) {
-      toast(e.message, "error");
-    }
-  });
-
   root.querySelector("#changePassword").addEventListener("click", openPasswordForm);
 
   root.querySelector("#signOutBtn").addEventListener("click", async () => {
     const ok = await confirmModal({
       title: "Sign out",
-      message: "You will need to sign in again on this device.",
+      message: "You'll need to sign in again on this device.",
       confirmLabel: "Sign out",
     });
     if (ok) await sb.auth.signOut();
   });
 }
-
-/* -------------------------------------------------------------- subjects -- */
 
 function paintSubjects() {
   const mine = new Set(store.mySubjects);
@@ -172,8 +132,7 @@ function paintSubjects() {
           <input type="checkbox" value="${esc(s.code)}"${mine.has(s.code) ? " checked" : ""}>
           <span>
             ${esc(s.name)}
-            <span class="subj-code">${esc(s.code)}</span>
-            ${cov ? `<span class="subj-corpus" title="${cov.questions} questions ingested">✓ papers</span>` : ""}
+            ${cov ? '<span class="subj-corpus">papers added</span>' : ""}
           </span>
         </label>`;
     })
@@ -181,118 +140,40 @@ function paintSubjects() {
   updateCount();
 }
 
-function filterSubjects(query) {
-  const q = query.trim().toLowerCase();
-  root.querySelectorAll("#subjGrid .subj").forEach((el) => {
-    el.hidden = q && !el.dataset.name.includes(q);
-  });
-}
-
 function updateCount() {
   const n = root.querySelectorAll("#subjGrid input:checked").length;
   root.querySelector("#subjCount").textContent = `${n} selected`;
 }
 
-/* --------------------------------------------------------------- tuition -- */
-
-async function paintTuition() {
-  const list = root.querySelector("#tuitionList");
-  try {
-    await loadTuition();
-  } catch (e) {
-    list.innerHTML = `<p class="muted">${esc(e.message)}</p>`;
-    return;
-  }
-  list.innerHTML = store.tuition.length
-    ? `<ul class="tuition-list">
-        ${store.tuition.map((t) => `
-          <li>
-            <span class="tuition-day">${WEEKDAYS[t.weekday]}</span>
-            <span class="tuition-time">${formatTime(t.start_time)}${t.end_time ? `–${formatTime(t.end_time)}` : ""}</span>
-            <span class="tuition-subject">${esc(subjectName(t.subject))}</span>
-            <span class="muted">${esc(t.tutor ?? "")}${t.location ? ` · ${esc(t.location)}` : ""}</span>
-            <button class="icon-btn" data-del-tuition="${esc(t.id)}" aria-label="Remove session">&times;</button>
-          </li>`).join("")}
-      </ul>`
-    : '<p class="muted">No tuition sessions yet. Add them and they appear on your week and calendar.</p>';
-}
-
-function openTuitionForm() {
-  const subjects = store.subjects.filter((s) => store.mySubjects.includes(s.code));
-  openModal({
-    title: "Add a tuition session",
-    body: `
-      <form id="tuitionForm" class="form-grid">
-        <label class="field">
-          <span>Subject</span>
-          <select id="tuSubject">
-            ${(subjects.length ? subjects : store.subjects)
-              .map((s) => `<option value="${esc(s.code)}">${esc(s.name)}</option>`).join("")}
-          </select>
-        </label>
-        <label class="field">
-          <span>Day</span>
-          <select id="tuDay">
-            ${WEEKDAYS.map((d, i) => `<option value="${i}"${i === 6 ? " selected" : ""}>${d}</option>`).join("")}
-          </select>
-        </label>
-        <label class="field"><span>Starts</span><input type="time" id="tuStart" value="16:00" data-autofocus></label>
-        <label class="field"><span>Ends <span class="muted">(optional)</span></span><input type="time" id="tuEnd"></label>
-        <label class="field"><span>Tutor <span class="muted">(optional)</span></span><input type="text" id="tuTutor"></label>
-        <label class="field"><span>Place <span class="muted">(optional)</span></span><input type="text" id="tuPlace"></label>
-      </form>`,
-    actions: `
-      <button class="btn-ghost" data-modal-close>Cancel</button>
-      <button class="btn-primary" id="tuSave">Add session</button>`,
-    onMount(dialog) {
-      dialog.querySelector("#tuSave").addEventListener("click", async (e) => {
-        const btn = e.currentTarget;
-        btn.disabled = true;
-        try {
-          await createTuition({
-            subject: dialog.querySelector("#tuSubject").value,
-            weekday: Number(dialog.querySelector("#tuDay").value),
-            start_time: dialog.querySelector("#tuStart").value,
-            end_time: dialog.querySelector("#tuEnd").value || null,
-            tutor: dialog.querySelector("#tuTutor").value.trim() || null,
-            location: dialog.querySelector("#tuPlace").value.trim() || null,
-          });
-          closeModal();
-          paintTuition();
-        } catch (err) {
-          btn.disabled = false;
-          toast(err.message, "error");
-        }
-      });
-    },
-  });
-}
-
-/* ----------------------------------------------------------------- usage -- */
-
 async function paintUsage() {
   const panel = root.querySelector("#usagePanel");
   const rows = await loadUsage();
   if (!rows.length) {
-    panel.innerHTML = '<p class="muted">Usage tracking is not set up on this deployment.</p>';
+    panel.innerHTML = '<p class="muted">No limits are set on this deployment.</p>';
     return;
   }
-  const names = { ask: "Questions asked", mark: "Answers marked", mock: "Mocks generated", similar: "Similar searches" };
+  const names = {
+    ask: "Questions asked",
+    mark: "Answers marked",
+    mock: "Mock papers made",
+    markpaper: "Papers marked",
+    ingest: "Papers added",
+    similar: "Similar-question searches",
+  };
   panel.innerHTML = `
     <div class="usage-grid">
       ${rows.map((r) => {
+        const left = Math.max(0, r.per_day - r.used);
         const pct = r.per_day ? Math.round((r.used / r.per_day) * 100) : 0;
         return `
           <div class="usage-row">
             <span class="usage-label">${esc(names[r.route] ?? r.route)}</span>
             <span class="bar"><span style="width:${Math.min(100, pct)}%" class="${pct >= 90 ? "poor" : pct >= 60 ? "mid" : "good"}"></span></span>
-            <span class="usage-count">${r.used} / ${r.per_day}</span>
+            <span class="usage-count">${left} left</span>
           </div>`;
       }).join("")}
     </div>`;
 }
-
-/* -------------------------------------------------------------- password -- */
 
 function openPasswordForm() {
   openModal({

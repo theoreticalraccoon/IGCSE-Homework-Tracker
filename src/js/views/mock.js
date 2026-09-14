@@ -40,26 +40,31 @@ async function renderList() {
     <header class="view-head">
       <div>
         <h1>Mock exams</h1>
-        <p class="view-sub">Built from real past questions — never invented ones.</p>
+        <p class="view-sub">A practice paper made from real past questions, marked when you finish.</p>
       </div>
     </header>
     <div id="generator"></div>
-    <h2 class="section-title">Your papers</h2>
+    <h2 class="section-title">Papers you have made</h2>
     <div id="mockList">${skeleton(3)}</div>`;
 
   paintGenerator();
 
   try {
     const mocks = await loadMocks();
-    root.querySelector("#mockList").innerHTML = mocks.length
+    // A slow load can finish after the student has already moved to another
+    // screen, by which point the element it was going to fill is gone.
+    const list = root.querySelector("#mockList");
+    if (!list) return;
+    list.innerHTML = mocks.length
       ? `<div class="mock-list">${mocks.map(mockCard).join("")}</div>`
       : emptyState({
           icon: "📝",
-          title: "No mocks yet",
-          message: "Generate one above. Markwise will pick real questions and mark them against the real schemes.",
+          title: "No papers yet",
+          message: "Make one above and sit it whenever you like.",
         });
   } catch (e) {
-    root.querySelector("#mockList").innerHTML = `<p class="muted">${esc(e.message)}</p>`;
+    const list = root.querySelector("#mockList");
+    if (list) list.innerHTML = `<p class="muted">${esc(e.message)}</p>`;
   }
 
   on(root, "click", "[data-open-mock]", (_, btn) => {
@@ -110,12 +115,14 @@ function mockCard(m) {
 function paintGenerator() {
   const grounded = groundedSubjects();
   const slot = root.querySelector("#generator");
+  // Gone already: the student navigated away before this ran.
+  if (!slot) return;
 
   if (!grounded.length) {
     slot.innerHTML = emptyState({
       icon: "📥",
-      title: "No corpus yet",
-      message: "Mocks are assembled from ingested past papers. Ingest a subject first.",
+      title: "No papers added yet",
+      message: "Mock papers are built from the past papers you have added, so add a few first.",
     });
     return;
   }
@@ -143,15 +150,15 @@ function paintGenerator() {
           </select>
         </label>
         <label class="field span-2">
-          <span>Topics <span class="muted">(leave empty for the whole subject)</span></span>
+          <span>Topics <span class="muted">(leave empty for a bit of everything)</span></span>
           <div class="topic-picker" id="genTopics"><span class="muted">Loading topics…</span></div>
         </label>
         <label class="toggle span-2">
-          <input type="checkbox" id="genWeak"> Weight it towards the topics I score worst on
+          <input type="checkbox" id="genWeak"> Focus on what I keep getting wrong
         </label>
       </div>
       <div class="gen-actions">
-        <button class="btn-primary" id="genBtn">Generate paper</button>
+        <button class="btn-primary" id="genBtn">Make a paper</button>
         <span class="muted" id="genNote"></span>
       </div>
     </section>`;
@@ -159,18 +166,20 @@ function paintGenerator() {
   const subjectSel = slot.querySelector("#genSubject");
   const refreshTopics = async () => {
     const box = slot.querySelector("#genTopics");
+    if (!box) return;
     box.innerHTML = '<span class="muted">Loading topics…</span>';
     try {
       const topics = await subjectTopics(corpusCode(subjectSel.value));
+      if (!box.isConnected) return;
       box.innerHTML = topics.length
         ? topics
             .map((t, i) => `
               <input type="checkbox" id="topic-${i}" value="${esc(t.topic)}">
               <label class="chip-toggle" for="topic-${i}">${esc(t.topic)} <span class="muted">${t.questions}</span></label>`)
             .join("")
-        : '<span class="muted">No topics classified for this subject yet.</span>';
+        : '<span class="muted">No topics worked out for this subject yet.</span>';
     } catch {
-      box.innerHTML = '<span class="muted">Could not load topics.</span>';
+      if (box.isConnected) box.innerHTML = '<span class="muted">Could not load topics.</span>';
     }
   };
   subjectSel.addEventListener("change", refreshTopics);
@@ -180,8 +189,9 @@ function paintGenerator() {
     const btn = e.currentTarget;
     const topics = [...slot.querySelectorAll("#genTopics input:checked")].map((i) => i.value);
     btn.disabled = true;
-    btn.textContent = "Assembling…";
-    slot.querySelector("#genNote").textContent = "Picking real questions and sequencing the paper.";
+    btn.textContent = "Making it…";
+    const note = slot.querySelector("#genNote");
+    if (note) note.textContent = "Choosing real questions for you…";
     try {
       const mock = await generateMock({
         subject: corpusCode(subjectSel.value),
@@ -194,8 +204,8 @@ function paintGenerator() {
     } catch (err) {
       toast(explainError(err) ?? "Could not generate that paper.", "error");
       btn.disabled = false;
-      btn.textContent = "Generate paper";
-      slot.querySelector("#genNote").textContent = "";
+      btn.textContent = "Make a paper";
+      if (note) note.textContent = "";
     }
   });
 }

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Markwise — IGCSE study assistant</title>
   <meta name="description"
-    content="Markwise plans your IGCSE work and answers, marks and quizzes you from the real past papers, mark schemes and syllabus.">
+    content="Track your homework, and get answers and marking from the real IGCSE past papers and mark schemes.">
   <meta name="color-scheme" content="light dark">
 
   <script>
@@ -19,22 +19,17 @@
   </script>
 
   <link rel="stylesheet" href="src/css/app.css">
+  <link rel="stylesheet" href="src/css/chat.css">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232f4fc4'/><path d='M8 17l5 5 11-12' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 </head>
 
 <body>
 
-  <!-- ==================== Sign in / sign up ==================== -->
   <div class="auth-screen" id="authScreen" hidden></div>
-
-  <!-- ==================== Set a new password ==================== -->
   <div class="auth-screen" id="recoveryScreen" hidden></div>
-
-  <!-- ==================== First-run subject picker ==================== -->
   <div class="auth-screen" id="onboardScreen" hidden></div>
 
-  <!-- ==================== The app ==================== -->
   <div class="app-shell" id="appShell" hidden>
 
     <nav class="sidebar" aria-label="Main">
@@ -43,45 +38,37 @@
         <span class="brand-name">Markwise</span>
       </div>
 
-      <button class="nav-link" data-nav="today">
-        <span class="nav-glyph" aria-hidden="true">◧</span> Today <span class="nav-key">T</span>
-      </button>
       <button class="nav-link" data-nav="planner">
-        <span class="nav-glyph" aria-hidden="true">☑</span> Planner <span class="nav-key">P</span>
+        <span class="nav-glyph" aria-hidden="true">☑</span> Planner
       </button>
-      <button class="nav-link" data-nav="calendar">
-        <span class="nav-glyph" aria-hidden="true">▦</span> Calendar <span class="nav-key">C</span>
-      </button>
-
-      <p class="nav-section">Study with the papers</p>
-      <button class="nav-link" data-nav="ask">
-        <span class="nav-glyph" aria-hidden="true">✦</span> Ask <span class="nav-key">A</span>
-      </button>
-      <button class="nav-link" data-nav="mark">
-        <span class="nav-glyph" aria-hidden="true">✓</span> Mark my answer <span class="nav-key">M</span>
+      <button class="nav-link" data-nav="assistant">
+        <span class="nav-glyph" aria-hidden="true">✦</span> Assistant
       </button>
       <button class="nav-link" data-nav="mock">
-        <span class="nav-glyph" aria-hidden="true">▤</span> Mock exams <span class="nav-key">K</span>
+        <span class="nav-glyph" aria-hidden="true">▤</span> Mock exams
       </button>
-      <button class="nav-link" data-nav="library">
-        <span class="nav-glyph" aria-hidden="true">▥</span> Library <span class="nav-key">L</span>
-      </button>
-      <button class="nav-link" data-nav="progress">
-        <span class="nav-glyph" aria-hidden="true">▲</span> Progress <span class="nav-key">G</span>
+      <button class="nav-link" data-nav="markpaper">
+        <span class="nav-glyph" aria-hidden="true">✓</span> Mark a paper
       </button>
 
       <div class="sidebar-foot">
-        <span class="user-email" id="userEmail"></span>
-        <button class="nav-link" data-nav="settings">
+        <button class="nav-link subtle" data-nav="papers">
+          <span class="nav-glyph" aria-hidden="true">📄</span> Your papers
+        </button>
+        <button class="nav-link subtle" data-nav="progress">
+          <span class="nav-glyph" aria-hidden="true">▲</span> Progress
+        </button>
+        <button class="nav-link subtle" data-nav="settings">
           <span class="nav-glyph" aria-hidden="true">⚙</span> Settings
         </button>
-        <button class="nav-link" id="signOut">
+        <span class="user-email" id="userEmail"></span>
+        <button class="nav-link subtle" id="signOut">
           <span class="nav-glyph" aria-hidden="true">→</span> Sign out
         </button>
       </div>
     </nav>
 
-    <div>
+    <div class="app-main">
       <div class="topbar">
         <button class="icon-btn" id="navToggle" aria-label="Menu">☰</button>
         <span class="brand-name">Markwise</span>
@@ -99,7 +86,7 @@
     <div class="auth-screen">
       <div class="auth-card">
         <h1>JavaScript required</h1>
-        <p class="auth-sub">Markwise needs JavaScript to load your work and talk to the papers.</p>
+        <p class="auth-sub">Markwise needs JavaScript to load your work.</p>
       </div>
     </div>
   </noscript>

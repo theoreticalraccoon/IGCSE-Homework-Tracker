@@ -29,7 +29,7 @@ export function parseHash(hash = location.hash) {
   const [path, search = ""] = raw.split("?");
   const segments = path.split("/").filter(Boolean);
   const query = Object.fromEntries(new URLSearchParams(search));
-  return { name: segments[0] || "today", segments: segments.slice(1), query };
+  return { name: segments[0] || "planner", segments: segments.slice(1), query };
 }
 
 export function navigate(path, { replace = false } = {}) {
@@ -52,7 +52,7 @@ export function navigate(path, { replace = false } = {}) {
 export async function handleRoute() {
   if (!container) return;
   const { name, segments, query } = parseHash();
-  const module = routes.get(name) ?? routes.get("today");
+  const module = routes.get(name) ?? routes.get("planner");
   if (!module) return;
 
   // Same route, different params: let the view decide rather than remounting.
