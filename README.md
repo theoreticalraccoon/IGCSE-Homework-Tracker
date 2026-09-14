@@ -71,6 +71,6 @@ use; for higher volume, configure your own SMTP under **Authentication → Email
 
 ```bash
 supabase login
-supabase link --project-ref yfzlypcxsmlakpxkrtbu
+supabase link --project-ref -
 supabase db push        # applies supabase/migrations/*.sql
 ```
