@@ -10,3 +10,11 @@ supabase/.branches/
 Thumbs.db
 .vscode/
 .idea/
+
+# Ingestion
+ingest/node_modules/
+ingest/pdfs/
+node_modules/
+
+# keep the ingestion template
+!ingest/.env.example

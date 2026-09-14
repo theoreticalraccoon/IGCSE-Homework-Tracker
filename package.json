@@ -1,0 +1,21 @@
+{
+  "name": "markwise",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "IGCSE study assistant: a planner, and an AI grounded in the real past papers and mark schemes.",
+  "scripts": {
+    "test": "node test/logic.test.mjs",
+    "test:functions": "node --env-file-if-exists=ingest/.env ingest/smoke-functions.mjs",
+    "serve": "npx --yes serve .",
+    "test:browser": "node --env-file-if-exists=ingest/.env ingest/smoke-browser.mjs",
+    "test:security": "node --env-file-if-exists=ingest/.env ingest/smoke-security.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright": "^1.63.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
