@@ -84,11 +84,13 @@ try {
       const data = (await readFile(join(PDF_DIR, qp))).toString("base64");
       const res = await fetch(`${FN}/mark-paper`, {
         method: "POST", headers,
-        body: JSON.stringify({ paperId: papers[0].id, files: [{ mimeType: "application/pdf", data }] }),
+        body: JSON.stringify({ subject: papers[0].subject_code, files: [{ mimeType: "application/pdf", data }] }),
       });
       const body = await res.json().catch(() => ({}));
 
-      if (res.status === 422 && body.error === "no_answers") {
+      if (res.status === 409 && body.error === "paper_not_held") {
+        check(true, "refuses to mark a paper it does not hold", body.message.slice(0, 70));
+      } else if (res.status === 422 && body.error === "no_answers") {
         check(true, "refuses to mark when it cannot find answers", body.message.slice(0, 60));
       } else if (res.ok) {
         check(true, "returned a marked paper", `${body.awarded}/${body.total} (${body.pct}%)`);

@@ -14,13 +14,16 @@
 import { esc, escLines, on } from "../ui/dom.js";
 import { toast, emptyState, spinner, confirmModal, skeleton } from "../ui/feedback.js";
 import { groundedSubjects, subjectName, corpusCode } from "../store.js";
-import { loadMocks, getMock, updateMock, deleteMock, subjectTopics, predictGrade } from "../api/data.js";
+import { loadMocks, getMock, updateMock, deleteMock, predictGrade } from "../api/data.js";
 import { generateMock, markAnswer, explainError } from "../api/ai.js";
 import { formatDateTime, minutesToHuman } from "../lib/dates.js";
 import { navigate } from "../router.js";
 
 let root = null;
 let timer = null;
+
+/** One paper's worth of practice: long enough to be useful, short enough to sit. */
+const DEFAULT_MARKS = 40;
 
 const draftKey = (id) => `markwise-mock-${id}`;
 
@@ -127,67 +130,30 @@ function paintGenerator() {
     return;
   }
 
+  // Subject is the only decision. Everything else — how many marks, how long,
+  // which topics — has a sensible answer the student should not have to make
+  // up before they can practise.
   slot.innerHTML = `
     <section class="card plain generator">
-      <div class="gen-grid">
+      <div class="gen-row">
         <label class="field">
           <span>Subject</span>
           <select id="genSubject">
             ${grounded.map((s) => `<option value="${esc(s.code)}">${esc(s.name)}</option>`).join("")}
           </select>
         </label>
-        <label class="field">
-          <span>Total marks</span>
-          <select id="genMarks">
-            ${[20, 40, 60, 80].map((n) => `<option value="${n}"${n === 40 ? " selected" : ""}>${n}</option>`).join("")}
-          </select>
-        </label>
-        <label class="field">
-          <span>Time</span>
-          <select id="genTime">
-            <option value="">Match the marks</option>
-            ${[30, 45, 60, 75, 90].map((n) => `<option value="${n}">${n} minutes</option>`).join("")}
-          </select>
-        </label>
-        <label class="field span-2">
-          <span>Topics <span class="muted">(leave empty for a bit of everything)</span></span>
-          <div class="topic-picker" id="genTopics"><span class="muted">Loading topics…</span></div>
-        </label>
-        <label class="toggle span-2">
-          <input type="checkbox" id="genWeak"> Focus on what I keep getting wrong
-        </label>
+        <button class="btn-primary big" id="genBtn">Make a paper</button>
       </div>
-      <div class="gen-actions">
-        <button class="btn-primary" id="genBtn">Make a paper</button>
-        <span class="muted" id="genNote"></span>
-      </div>
+      <p class="gen-note muted" id="genNote">
+        Around ${DEFAULT_MARKS} marks of real past questions, weighted towards whatever
+        you have been losing marks on.
+      </p>
     </section>`;
 
   const subjectSel = slot.querySelector("#genSubject");
-  const refreshTopics = async () => {
-    const box = slot.querySelector("#genTopics");
-    if (!box) return;
-    box.innerHTML = '<span class="muted">Loading topics…</span>';
-    try {
-      const topics = await subjectTopics(corpusCode(subjectSel.value));
-      if (!box.isConnected) return;
-      box.innerHTML = topics.length
-        ? topics
-            .map((t, i) => `
-              <input type="checkbox" id="topic-${i}" value="${esc(t.topic)}">
-              <label class="chip-toggle" for="topic-${i}">${esc(t.topic)} <span class="muted">${t.questions}</span></label>`)
-            .join("")
-        : '<span class="muted">No topics worked out for this subject yet.</span>';
-    } catch {
-      if (box.isConnected) box.innerHTML = '<span class="muted">Could not load topics.</span>';
-    }
-  };
-  subjectSel.addEventListener("change", refreshTopics);
-  refreshTopics();
 
   slot.querySelector("#genBtn").addEventListener("click", async (e) => {
     const btn = e.currentTarget;
-    const topics = [...slot.querySelectorAll("#genTopics input:checked")].map((i) => i.value);
     btn.disabled = true;
     btn.textContent = "Making it…";
     const note = slot.querySelector("#genNote");
@@ -195,10 +161,8 @@ function paintGenerator() {
     try {
       const mock = await generateMock({
         subject: corpusCode(subjectSel.value),
-        marks: Number(slot.querySelector("#genMarks").value),
-        durationMin: Number(slot.querySelector("#genTime").value) || undefined,
-        topics,
-        weakFirst: slot.querySelector("#genWeak").checked,
+        marks: DEFAULT_MARKS,
+        weakFirst: true,
       });
       navigate(`mock/${mock.id}`);
     } catch (err) {

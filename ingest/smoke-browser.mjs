@@ -148,20 +148,21 @@ try {
     );
   });
 
-  await step("mock: generator renders", async () => {
+  await step("mock: subject is the only input", async () => {
     await page.click(String.raw`[data-nav="mock"]`);
     await page.waitForSelector("#genBtn", { timeout: 20000 });
+    for (const gone of ["#genMarks", "#genTime", "#genTopics", "#genWeak"]) {
+      if (await page.locator(gone).count()) note("mock", `${gone} is still on screen`);
+    }
+    if (!(await page.locator("#genSubject").count())) note("mock", "no subject picker");
   });
 
   await step("mark a paper: three steps render", async () => {
     await page.click(String.raw`[data-nav="markpaper"]`);
     await page.waitForSelector("#mpDrop", { timeout: 20000 });
-    await page.waitForFunction(
-      () => !document.querySelector("#mpPaper")?.textContent.includes("Loading"),
-      null, { timeout: 20000 },
-    );
+    if (await page.locator("#mpPaper").count()) note("markpaper", "still asks which paper — should read it from the upload");
     const disabled = await page.locator("#mpGo").isDisabled();
-    if (!disabled) note("markpaper", "Mark button is enabled with no photos attached");
+    if (!disabled) note("markpaper", "Mark button is enabled with nothing uploaded");
   });
 
   await step("your papers: dropzone and coverage", async () => {

@@ -10,7 +10,8 @@
     "serve": "npx --yes serve .",
     "test:browser": "node --env-file-if-exists=ingest/.env ingest/smoke-browser.mjs",
     "test:security": "node --env-file-if-exists=ingest/.env ingest/smoke-security.mjs",
-    "test:upload": "node --env-file-if-exists=ingest/.env ingest/smoke-upload.mjs"
+    "test:upload": "node --env-file-if-exists=ingest/.env ingest/smoke-upload.mjs",
+    "rag:proof": "node --env-file-if-exists=ingest/.env ingest/rag-proof.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",

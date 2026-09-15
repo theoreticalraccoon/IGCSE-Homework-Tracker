@@ -229,10 +229,16 @@ Deno.serve(async (req) => {
   });
 
   const paperId = await upsertPaper(admin, subjectCode, id, paperCode, body.fileName ?? null);
+
+  // Mark schemes this paper already had, before its rows are replaced.
+  // Re-adding a question paper must never silently destroy pairings that took
+  // a separate upload — or a whole CLI run — to establish.
+  const existing = await loadExistingMarkSchemes(admin, paperId);
   await admin.from("chunks").delete().eq("paper_id", paperId);
 
-  // Pair with a mark scheme that was added earlier, if there is one.
+  // A mark scheme uploaded before its question paper waits here for it.
   const pending = await loadPendingMarkScheme(admin, subjectCode, id);
+  for (const [k, v] of existing) if (!pending.has(k)) pending.set(k, v);
 
   const rows = clean.map((p) => ({
     paper_id: paperId,
@@ -341,6 +347,17 @@ async function upsertPaper(
   const { data, error } = await admin.from("papers").insert(row).select("id").single();
   if (error) throw new Error(`Could not save that paper: ${error.message}`);
   return data.id;
+}
+
+/** Mark schemes already attached to this paper's questions, by question number. */
+async function loadExistingMarkSchemes(
+  admin: ReturnType<typeof adminClient>, paperId: string,
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const { data } = await admin.from("chunks")
+    .select("question_no,ms_content").eq("paper_id", paperId).not("ms_content", "is", null);
+  for (const row of data ?? []) map.set(key(row.question_no), row.ms_content);
+  return map;
 }
 
 /**

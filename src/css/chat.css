@@ -303,3 +303,12 @@
   .coverage-row { grid-template-columns: 1fr auto; }
   .coverage-years { display: none; }
 }
+
+/* --- one-decision generator, and the paper a mark ran against ------------ */
+
+.gen-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.gen-row .field { margin-bottom: 0; flex: 1 1 220px; max-width: 320px; }
+.gen-note { font-size: 12.5px; margin: 12px 0 0; max-width: 52ch; }
+
+.matched-paper { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+.matched-paper strong { color: var(--ink); font-weight: 600; }

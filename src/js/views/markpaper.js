@@ -13,7 +13,6 @@
 import { esc, on } from "../ui/dom.js";
 import { toast, emptyState, spinner } from "../ui/feedback.js";
 import { groundedSubjects, corpusCode } from "../store.js";
-import { listPapers } from "../api/data.js";
 import { markPaper, explainError } from "../api/ai.js";
 import { navigate } from "../router.js";
 
@@ -21,7 +20,7 @@ const MAX_EDGE = 1600;
 const JPEG_QUALITY = 0.82;
 
 let root = null;
-let state = { subject: null, paperId: null, papers: [], files: [], busy: false, result: null };
+let state = { subject: null, files: [], busy: false, result: null };
 
 export async function render(container) {
   root = container;
@@ -32,8 +31,6 @@ export async function render(container) {
 
   container.innerHTML = shell();
   wire();
-
-  if (grounded.length) await loadPapers();
   paint();
 }
 
@@ -50,23 +47,25 @@ function shell() {
     ${grounded.length ? `
       <div class="steps">
         <section class="step">
-          <p class="step-label"><span class="step-n">1</span> Which paper did you do?</p>
+          <p class="step-label"><span class="step-n">1</span> Which subject?</p>
           <div class="step-body">
             <select id="mpSubject" aria-label="Subject">
               ${grounded.map((s) => `<option value="${esc(s.code)}">${esc(s.name)}</option>`).join("")}
             </select>
-            <select id="mpPaper" aria-label="Paper"><option>Loading…</option></select>
           </div>
         </section>
 
         <section class="step">
-          <p class="step-label"><span class="step-n">2</span> Add photos of your answers</p>
+          <p class="step-label"><span class="step-n">2</span> Upload the paper you did</p>
           <div class="step-body">
             <label class="dropzone" id="mpDrop">
               <input type="file" id="mpFiles" accept="image/*,application/pdf" multiple hidden>
-              <span class="dropzone-icon">📷</span>
-              <span class="dropzone-main">Tap to add photos, or drop them here</span>
-              <span class="dropzone-sub">One photo per page. A PDF scan works too.</span>
+              <span class="dropzone-icon">📄</span>
+              <span class="dropzone-main">Drop your paper here, or tap to choose</span>
+              <span class="dropzone-sub">
+                A PDF scan, or a photo of each page. Markwise reads the cover to work out
+                which paper it is — you don't need to tell it.
+              </span>
             </label>
             <div id="mpFileList"></div>
           </div>
@@ -87,15 +86,8 @@ function shell() {
 function wire() {
   if (!root.querySelector("#mpSubject")) return;
 
-  root.querySelector("#mpSubject").addEventListener("change", async (e) => {
+  root.querySelector("#mpSubject").addEventListener("change", (e) => {
     state.subject = e.target.value;
-    state.paperId = null;
-    await loadPapers();
-    paint();
-  });
-
-  root.querySelector("#mpPaper").addEventListener("change", (e) => {
-    state.paperId = e.target.value || null;
     paint();
   });
 
@@ -117,22 +109,6 @@ function wire() {
   });
 
   root.querySelector("#mpGo").addEventListener("click", submit);
-}
-
-async function loadPapers() {
-  const select = root.querySelector("#mpPaper");
-  if (!select) return;
-  select.innerHTML = "<option>Loading…</option>";
-  try {
-    state.papers = await listPapers(corpusCode(state.subject));
-  } catch (e) {
-    state.papers = [];
-    toast(e.message, "error");
-  }
-  select.innerHTML = state.papers.length
-    ? state.papers.map((p) => `<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("")
-    : '<option value="">No papers added for this subject yet</option>';
-  state.paperId = state.papers[0]?.id ?? null;
 }
 
 /* ------------------------------------------------------------------- files -- */
@@ -208,12 +184,12 @@ function paint() {
 
   const go = root.querySelector("#mpGo");
   if (go) {
-    const ready = state.paperId && state.files.length && !state.busy;
+    const ready = state.subject && state.files.length && !state.busy;
     go.disabled = !ready;
     go.textContent = state.busy ? "Marking…" : "Mark my paper";
     root.querySelector("#mpNote").textContent = state.busy
-      ? "Reading your handwriting, then marking each question. This takes a minute."
-      : state.files.length ? "" : "Add at least one photo.";
+      ? "Working out which paper this is, then marking every question. Give it a minute."
+      : state.files.length ? "" : "Upload your paper first.";
   }
 }
 
@@ -223,11 +199,11 @@ async function submit() {
   if (state.busy) return;
   state.busy = true;
   paint();
-  root.querySelector("#mpResult").innerHTML = spinner("Reading your answers…");
+  root.querySelector("#mpResult").innerHTML = spinner("Reading your paper…");
 
   try {
     const result = await markPaper({
-      paperId: state.paperId,
+      subject: corpusCode(state.subject),
       files: state.files.map((f) => ({ mimeType: f.mimeType, data: f.data })),
     });
     state.result = result;
@@ -258,6 +234,7 @@ function paintResult(r) {
 
   root.querySelector("#mpResult").innerHTML = `
     <section class="paper-result">
+      <p class="matched-paper">Marked against <strong>${esc(r.paper?.title ?? "")}</strong></p>
       <div class="result-top">
         <div class="score ${band}">
           <span class="score-value">${r.awarded}<span class="score-of">/${r.total}</span></span>
