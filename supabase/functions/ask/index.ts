@@ -2,7 +2,7 @@
  * POST /functions/v1/ask
  *
  * Grounded chat. Streams the answer back over SSE so the first token appears
- * quickly even though retrieval ran first — on a free tier that perceived
+ * quickly even though retrieval ran first: on a free tier that perceived
  * latency is most of the felt quality.
  *
  * Body:   { question, subject?, mode?, threadId?, history? }

@@ -20,7 +20,7 @@ export const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
 async function authHeaders() {
   const { data } = await sb.auth.getSession();
   const token = data?.session?.access_token;
-  if (!token) throw new Error("Your session expired — sign in again.");
+  if (!token) throw new Error("Your session expired: sign in again.");
   return {
     Authorization: `Bearer ${token}`,
     apikey: SUPABASE_KEY,

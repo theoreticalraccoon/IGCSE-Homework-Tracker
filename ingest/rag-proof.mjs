@@ -1,12 +1,12 @@
 /**
- * RAG proof — shows each stage of retrieval-augmented generation on real data.
+ * RAG proof: shows each stage of retrieval-augmented generation on real data.
  *
  *   npm run rag:proof
  *
  * Prints what is actually happening for one question: the embedding, the
  * hybrid search, the chunks that came back, the verbatim text handed to the
- * model, and the grounded answer. Then runs the ablation that matters — the
- * same question with retrieval switched off — because an app can claim to do
+ * model, and the grounded answer. Then runs the ablation that matters: the
+ * same question with retrieval switched off. Because an app can claim to do
  * RAG while quietly answering from the model's own memory, and the only way to
  * tell from outside is to remove the corpus and see whether anything changes.
  */
@@ -41,7 +41,7 @@ rule("0. THE CORPUS  (what retrieval can draw on)");
 }
 
 /* -- 1. the query becomes a vector -------------------------------------- */
-rule("1. RETRIEVAL — the question is embedded");
+rule("1. RETRIEVAL. The question is embedded");
 const [vector] = await embedBatch([QUESTION], "RETRIEVAL_QUERY");
 console.log(`  "${QUESTION}"`);
 console.log(`  → ${vector.length}-dimensional vector: [${vector.slice(0, 4).map((v) => v.toFixed(4)).join(", ")}, …]`);
@@ -49,7 +49,7 @@ const norm = Math.sqrt(vector.reduce((s, v) => s + v * v, 0));
 console.log(`  → L2 norm ${norm.toFixed(4)} (normalised, so cosine distance is meaningful)`);
 
 /* -- 2. hybrid search over the corpus ------------------------------------ */
-rule("2. RETRIEVAL — hybrid search (vector + keyword, RRF-fused)");
+rule("2. RETRIEVAL: hybrid search (vector + keyword, RRF-fused)");
 const { data: hits, error } = await admin.rpc("match_chunks", {
   query_embedding: vector,
   query_text: QUESTION,
@@ -65,7 +65,7 @@ for (const h of hits) {
 }
 
 /* -- 3. what the model is actually given --------------------------------- */
-rule("3. AUGMENTATION — the verbatim text placed in the prompt");
+rule("3. AUGMENTATION. The verbatim text placed in the prompt");
 {
   const top = hits[0];
   console.log(`  From ${top.paper_code} Q${top.question_no}:\n`);
@@ -75,7 +75,7 @@ rule("3. AUGMENTATION — the verbatim text placed in the prompt");
 }
 
 /* -- 4. generation, grounded --------------------------------------------- */
-rule("4. GENERATION — the answer, with citations");
+rule("4. GENERATION. The answer, with citations");
 const email = `rag-${Date.now()}@example.com`;
 const password = "ragproof1234";
 const { data: u } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
@@ -119,7 +119,7 @@ try {
   console.log(`\n  ${grounded.text.replace(/\n/g, "\n  ").slice(0, 900)}`);
 
   /* -- 5. the ablation --------------------------------------------------- */
-  rule("5. ABLATION — the same question against a subject with no corpus");
+  rule("5. ABLATION. The same question against a subject with no corpus");
   console.log("  If this app were only prompting an LLM, removing the corpus would change");
   console.log("  nothing. It should instead refuse, because the prompt forbids answering");
   console.log("  from the model's own recollection.\n");
@@ -127,7 +127,7 @@ try {
   const { data: empty } = await admin.from("subjects").select("code")
     .not("code", "in", `(${SUBJECT})`).limit(1).single();
   const ungrounded = await askOnce(empty.code);
-  console.log(`  subject "${empty.code}" — sources retrieved: ${ungrounded.citations.length}`);
+  console.log(`  subject "${empty.code}": sources retrieved: ${ungrounded.citations.length}`);
   console.log(`\n  ${ungrounded.text.replace(/\n/g, "\n  ").slice(0, 400)}`);
 
   rule("VERDICT");
@@ -138,7 +138,7 @@ try {
   console.log(`  quoted mark scheme text appears in answer .... ${
     hits[0].ms_content && grounded.text.includes(hits[0].ms_content.slice(0, 12).trim()) ? "YES" : "partial"}`);
   console.log(`  refuses when the corpus is empty ............. ${refused || ungrounded.citations.length === 0 ? "YES" : "NO"}`);
-  console.log(`\n  This is retrieval-augmented generation: search first, then generate\n  from what was found — not a prompt wrapped around a chatbot.`);
+  console.log(`\n  This is retrieval-augmented generation: search first, then generate\n  from what was found. Not a prompt wrapped around a chatbot.`);
 } finally {
   await admin.auth.admin.deleteUser(u.user.id).catch(() => {});
 }

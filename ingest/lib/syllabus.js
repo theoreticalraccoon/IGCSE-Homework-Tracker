@@ -12,12 +12,12 @@ import { cleanLines } from "./parse.js";
 
 /* ---------------------------------------------------------------- syllabus -- */
 
-// "1 Numbers and the number system" / "3 Waves" / "B4 Enzymes" — a top-level
+// "1 Numbers and the number system" / "3 Waves" / "B4 Enzymes". A top-level
 // topic. Must not end in a digit, which is what distinguishes a real heading
 // from a contents-page entry ("1 About this specification 1").
 const TOPIC = /^([A-Z]?\d{1,2})\s+([A-Z][A-Za-z][A-Za-z ,&'’\-()/]{3,70})$/;
 
-// "1.1 Integers" / "2.3" — a numbered subsection beneath a topic. Edexcel puts
+// "1.1 Integers" / "2.3". A numbered subsection beneath a topic. Edexcel puts
 // the subsection's name in a separate table column, so it often arrives on the
 // following line and the title here is empty.
 const SUBSECTION = /^([A-Z]?\d{1,2}\.\d{1,2}(?:\.\d{1,2})?)\s*(.*)$/;
@@ -49,7 +49,7 @@ function findContentStart(lines) {
  * `topic` is deliberately the TOP-LEVEL heading, not the subsection name. It
  * becomes the controlled vocabulary every exam question is classified against,
  * and the mastery table is only meaningful if that vocabulary is a handful of
- * buckets a student would recognise — "Algebra and graphs", not "1.4 Use of
+ * buckets a student would recognise: "Algebra and graphs", not "1.4 Use of
  * symbols". Subsection numbers are kept as `ref` so citations stay precise.
  *
  * @returns {{ref,topic,content}[]}
@@ -74,7 +74,7 @@ export function parseSyllabus(pages) {
         sections.push({
           ref: current.ref,
           topic: current.topic,
-          content: `${current.topic} — ${current.ref}${current.title ? ` ${current.title}` : ""}\n${body}`,
+          content: `${current.topic}: ${current.ref}${current.title ? ` ${current.title}` : ""}\n${body}`,
         });
       }
     }
@@ -164,7 +164,7 @@ export async function llmParseSyllabus(pages, subjectName) {
  *   Component 42   A*  B  C ...
  *                  55  48 41 ...
  *
- * Parsed deterministically — there is no ambiguity worth spending a model call
+ * Parsed deterministically. There is no ambiguity worth spending a model call
  * on, and a wrong grade boundary silently corrupts every predicted grade.
  */
 const GRADES = ["A*", "A", "B", "C", "D", "E", "F", "G"];

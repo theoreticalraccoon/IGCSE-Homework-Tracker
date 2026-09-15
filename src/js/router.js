@@ -2,7 +2,7 @@
  * Hash router.
  *
  * Hash rather than history API because the app is a static file that may be
- * opened from disk or from a subpath on any host — there is no server to
+ * opened from disk or from a subpath on any host. There is no server to
  * rewrite deep links.
  *
  * Each route exports `render(container, params)` and may return a cleanup
@@ -40,7 +40,7 @@ export function navigate(path, { replace = false } = {}) {
   }
   if (replace) {
     // replaceState rewrites the URL without firing hashchange, so the router
-    // would never hear about it — the address bar would say ".../marked" while
+    // would never hear about it. The address bar would say "../marked" while
     // the previous view stayed on screen. Render it explicitly.
     history.replaceState(null, "", target);
     handleRoute();

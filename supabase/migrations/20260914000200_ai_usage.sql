@@ -1,5 +1,5 @@
 -- ============================================================================
--- Markwise — AI usage accounting.
+-- Markwise: AI usage accounting.
 --
 -- The Gemini free tier is a shared, per-project resource: one student running
 -- a loop can exhaust the daily quota for everyone. This gives each user a

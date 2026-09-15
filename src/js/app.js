@@ -1,8 +1,8 @@
 /**
  * Bootstrap: auth gate, catalogue load, router wiring.
  *
- * Three screens exist outside the router — sign-in, password recovery and
- * first-run onboarding — because none of them should render the app shell.
+ * Three screens exist outside the router: sign-in, password recovery and
+ * first-run onboarding. Because none of them should render the app shell.
  * Everything after that is a route.
  */
 
@@ -89,7 +89,7 @@ function boot() {
     routerStarted = true;
   } else {
     // Re-render where we already are. Navigating to parseHash().name would
-    // drop the segments — landing on #/mock instead of #/mock/<id> — which is
+    // drop the segments, landing on #/mock instead of #/mock/<id>, which is
     // exactly what happened when a student reloaded mid-paper.
     handleRoute();
   }

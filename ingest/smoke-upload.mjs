@@ -1,5 +1,5 @@
 /**
- * Upload smoke test — proves the two in-app document routes actually work.
+ * Upload smoke test: proves the two in-app document routes actually work.
  *
  *   npm run test:upload
  *
@@ -31,7 +31,7 @@ const userId = created.user.id;
 
 const problems = [];
 const check = (ok, what, detail = "") => {
-  console.log(`  ${ok ? "ok  " : "FAIL"}  ${what}${detail ? ` — ${detail}` : ""}`);
+  console.log(`  ${ok ? "ok  " : "FAIL"}  ${what}${detail ? `: ${detail}` : ""}`);
   if (!ok) problems.push(what);
 };
 

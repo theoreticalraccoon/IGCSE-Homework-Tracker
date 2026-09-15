@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Markwise">
+  <title>Markwise</title>
+  <!--
+    The small-size mark: a browser tab renders this at 16px, where ruled lines
+    and a ringed "A+" collapse into grey mush. Everything that cannot survive
+    that size is dropped, leaving the two things that carry the identity: the
+    M and the tick. The full mark lives in markwise-mark.svg.
+  -->
+  <defs>
+    <linearGradient id="mwIcon" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2F6BFF"/>
+      <stop offset="1" stop-color="#4B37D8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="url(#mwIcon)"/>
+
+  <path d="M17 46V22l9.5 15L36 22v24"
+        fill="none" stroke="#FFFFFF" stroke-width="7"
+        stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+
+  <path d="m33 38 6 6.2 12-13.2"
+        fill="none" stroke="#FFFFFF" stroke-width="7"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

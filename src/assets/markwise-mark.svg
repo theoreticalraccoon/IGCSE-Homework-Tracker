@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Markwise">
+  <title>Markwise</title>
+  <defs>
+    <linearGradient id="mwBlue" x1="22" y1="10" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2F6BFF"/>
+      <stop offset="1" stop-color="#4B37D8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- The M, one stroked path so the joins stay clean at any size. Its left
+       stem sits behind the script, which is what makes the monogram read as a
+       marked paper rather than a letter with a picture beside it. -->
+  <path d="M25 55.5V16l13.5 24L52 16v39.5"
+        fill="none" stroke="url(#mwBlue)" stroke-width="12"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- The script, tilted the way one sits on a desk. -->
+  <g transform="rotate(-4 17 33)">
+    <rect x="4.5" y="10" width="23" height="46" rx="3" fill="#FFFFFF"/>
+    <!-- A hair of shadow down the fold, so the page reads as paper. -->
+    <rect x="25.6" y="10" width="1.9" height="46" fill="#000000" opacity=".06"/>
+    <g fill="#C3CBDA">
+      <rect x="9.5" y="17" width="13" height="2.4" rx="1.2"/>
+      <rect x="9.5" y="22.4" width="10" height="2.4" rx="1.2"/>
+      <rect x="9.5" y="27.8" width="12" height="2.4" rx="1.2"/>
+    </g>
+    <!-- The grade, ringed the way a teacher rings it. -->
+    <circle cx="16" cy="42.5" r="7.6" fill="none" stroke="#2F6BFF" stroke-width="2"/>
+    <text x="16" y="46" text-anchor="middle"
+          font-family="Segoe UI, Helvetica Neue, Arial, sans-serif"
+          font-size="9.5" font-weight="700" fill="#2F6BFF">A+</text>
+  </g>
+
+  <!-- The tick, struck through the right stem. -->
+  <path d="m45.8 40.8 4.4 4.6 8.6-9.6"
+        fill="none" stroke="#FFFFFF" stroke-width="5.4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -5,7 +5,7 @@
  * which is exact and free but needs a Node process and a folder of correctly
  * named files. Neither exists when a student drags a PDF into the browser, so
  * the in-app path hands the whole document to Gemini instead and lets it read
- * the layout directly — slower and not free, but it needs nothing from the
+ * the layout directly: slower and not free, but it needs nothing from the
  * student except the file.
  */
 
@@ -34,14 +34,14 @@ export const MAX_BASE64 = 15 * 1024 * 1024;
 
 export function validate(files: Attachment[]): string | null {
   if (!files.length) return "Attach at least one file.";
-  if (files.length > 12) return "That is too many files at once — send up to 12.";
+  if (files.length > 12) return "That is too many files at once: send up to 12.";
   let total = 0;
   for (const f of files) {
     if (!ALLOWED_TYPES.has(f.mimeType)) return `${f.mimeType} is not a PDF or a photo.`;
     if (!f.data) return "One of the files came through empty.";
     total += f.data.length;
   }
-  if (total > MAX_BASE64) return "Those files are too large — try fewer, or smaller photos.";
+  if (total > MAX_BASE64) return "Those files are too large: try fewer, or smaller photos.";
   return null;
 }
 

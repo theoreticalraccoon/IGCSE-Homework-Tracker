@@ -1,5 +1,5 @@
 /**
- * Mark paper — photograph your written answers, get the whole paper marked.
+ * Mark paper: photograph your written answers, get the whole paper marked.
  *
  * Three steps on one screen: pick the paper, add photos, get it back marked.
  * The student never types anything.
@@ -64,7 +64,7 @@ function shell() {
               <span class="dropzone-main">Drop your paper here, or tap to choose</span>
               <span class="dropzone-sub">
                 A PDF scan, or a photo of each page. Markwise reads the cover to work out
-                which paper it is — you don't need to tell it.
+                which paper it is. You don't need to tell it.
               </span>
             </label>
             <div id="mpFileList"></div>
@@ -160,7 +160,7 @@ function paint() {
     root.querySelector(".view-head").insertAdjacentHTML("afterend", "");
     root.innerHTML = root.querySelector(".view-head").outerHTML + emptyState({
       icon: "📄",
-      title: "Add a past paper first",
+      title: "Nothing loaded for this subject yet",
       message: "Marking works against the real mark scheme, so it only covers subjects whose papers are loaded. Pick one of those in Settings.",
       action: `<button class="btn-ghost" data-goto="settings">Choose subjects</button>`,
     });
@@ -280,7 +280,7 @@ function questionCard(q) {
     <li class="paper-q">
       <div class="paper-q-head">
         <span class="q-n">${esc(q.questionNo)}</span>
-        <span class="marks-pill ${band}">${q.awarded === null ? "—" : q.awarded}/${q.marks}</span>
+        <span class="marks-pill ${band}">${q.awarded === null ? ": " : q.awarded}/${q.marks}</span>
         ${q.topic ? `<span class="muted">${esc(q.topic)}</span>` : ""}
       </div>
 

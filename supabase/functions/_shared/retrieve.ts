@@ -1,5 +1,5 @@
 /**
- * Retrieval — the part that makes Markwise different from asking Gemini.
+ * Retrieval. The part that makes Markwise different from asking Gemini.
  *
  * Pipeline, in order:
  *
@@ -9,7 +9,7 @@
  *      identifier found becomes a SQL filter instead of a similarity hint.
  *   2. Hybrid search (vector + full text, RRF-fused) inside those filters.
  *   3. Sibling expansion. Question parts are retrieved individually but only
- *      make sense with the stem — "4(b) Explain why this happens" is useless
+ *      make sense with the stem: "4(b) Explain why this happens" is useless
  *      without 4(a). Siblings of the top hits are pulled in whole.
  *   4. Budgeted packing. Free-tier context is finite, so chunks are added
  *      highest-score-first until the character budget is spent.
@@ -76,7 +76,7 @@ export function parseQuery(text: string): QueryFilters {
   // Filename form: 0625_s19_qp_42 / 0625 w21 ms 22 / e-4ma1_s24_qp_13
   //
   // The subject token is a Cambridge 4-digit code or a board-prefixed one, and
-  // the separators are underscores — which are word characters, so `\b` cannot
+  // the separators are underscores. Which are word characters, so `\b` cannot
   // be used to bound them.
   const file = t.match(
     /(?:^|[^a-z0-9])((?:[a-z]{1,3}-)?[a-z0-9]{3,12})[_ -]([msw])(\d{2})[_ -]?(?:qp|ms|er|papers?|p)?[_ -]?(\d)(\d)?(?:[^0-9]|$)/,
@@ -160,7 +160,7 @@ async function exactLookup(
   const rows = data as Chunk[];
 
   const exact = rows.filter((c) => strip(c.question_no) === want);
-  // "Q4" should also bring back 4(a), 4(b)(i) — the whole question.
+  // "Q4" should also bring back 4(a), 4(b)(i). The whole question.
   const children = rows.filter((c) => strip(c.question_no).startsWith(want) && strip(c.question_no) !== want);
 
   return [...exact, ...children].slice(0, 12).map((c, i) => ({ ...c, score: 100 - i }));
@@ -202,7 +202,7 @@ export async function search(
     const seen = new Set(pinned.map((c) => c.id));
     hits = [...pinned, ...hits.filter((c) => !seen.has(c.id))];
   } else if (filters.questionNo) {
-    // No paper was named, so only the number is known — promote number matches
+    // No paper was named, so only the number is known: promote number matches
     // rather than trusting similarity to have found them.
     const want = strip(filters.questionNo);
     hits.sort((a, b) => rankExact(b, want) - rankExact(a, want));
@@ -249,7 +249,7 @@ export async function getQuestion(db: SupabaseClient, chunkId: string): Promise<
 
 export function label(c: Chunk): string {
   if (c.kind === "syllabus") {
-    return `${c.subject_code} syllabus${c.topic ? ` — ${c.topic}` : ""}`;
+    return `${c.subject_code} syllabus${c.topic ? `: ${c.topic}` : ""}`;
   }
   const bits = [c.subject_code];
   if (c.session && c.year) bits.push(`${c.session} ${c.year}`);
@@ -291,7 +291,7 @@ export function packContext(chunks: Chunk[], budget = 24000): { text: string; us
 }
 
 function renderChunk(c: Chunk, n: number): string {
-  const head = `[${n}] ${label(c)}${c.marks ? ` — ${c.marks} mark${c.marks === 1 ? "" : "s"}` : ""}${c.topic ? ` — topic: ${c.topic}` : ""}`;
+  const head = `[${n}] ${label(c)}${c.marks ? `, ${c.marks} mark${c.marks === 1 ? "" : "s"}` : ""}${c.topic ? `, topic: ${c.topic}` : ""}`;
   const lines = [head];
   if (c.kind === "syllabus") {
     lines.push(`SYLLABUS: ${c.content.trim()}`);

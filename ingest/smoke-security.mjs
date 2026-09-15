@@ -1,5 +1,5 @@
 /**
- * Security smoke test — proves row-level security actually holds.
+ * Security smoke test: proves row-level security actually holds.
  *
  *   npm run test:security
  *
@@ -125,7 +125,7 @@ try {
 }
 
 if (problems.length) {
-  console.log(`\n${problems.length} SECURITY PROBLEM(S) — these are not cosmetic.`);
+  console.log(`\n${problems.length} SECURITY PROBLEM(S). These are not cosmetic.`);
   process.exit(1);
 }
 console.log("\nSecurity: row-level security holds on every path tested.");

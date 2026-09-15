@@ -1,5 +1,5 @@
 /**
- * Logic tests — no database, no network, no browser.
+ * Logic tests. No database, no network, no browser.
  *
  *   node test/logic.test.mjs
  *
@@ -167,7 +167,7 @@ let build;
 try {
   ({ build } = await import("esbuild"));
 } catch {
-  console.log("  (skipped — esbuild not installed: npm i -D esbuild)");
+  console.log("  (skipped: esbuild not installed: npm i -D esbuild)");
 }
 const out = build && await build({
   entryPoints: [join(REPO, "supabase/functions/_shared/retrieve.ts")],

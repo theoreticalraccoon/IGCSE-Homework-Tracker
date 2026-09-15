@@ -68,7 +68,7 @@ export async function extractPages(path) {
  *
  * This matters more than it sounds. Exam papers set the question number as its
  * own text item in the left margin, so concatenating naively yields
- * "1Here are the first four terms" — and worse, "2450 students were asked",
+ * "1Here are the first four terms". And worse, "2450 students were asked",
  * which is question 2 asking about 450 students. Both are unparseable, and the
  * second is indistinguishable from a line that really does start with 2450.
  * Measuring the gap recovers the space and makes the question number visible
@@ -119,7 +119,7 @@ export async function renderPagePng(path, pageNo, scale = 2) {
   try {
     ({ createCanvas } = require("canvas"));
   } catch {
-    return null; // OCR unavailable — not fatal
+    return null; // OCR unavailable. Not fatal
   }
   const { getDocument } = await lib();
   const data = new Uint8Array(await readFile(path));

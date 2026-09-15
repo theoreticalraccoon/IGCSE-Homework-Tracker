@@ -7,7 +7,7 @@
  *  1. Rate limits are per-key and low. GEMINI_API_KEYS may hold several
  *     comma-separated keys; requests round-robin across them and a 429 rotates
  *     to the next key before backing off.
- *  2. Free-tier 429/503 are routine, not exceptional — every call retries with
+ *  2. Free-tier 429/503 are routine, not exceptional. Every call retries with
  *     jittered exponential backoff.
  *  3. Embedding is the expensive half of ingestion, so batchEmbedContents is
  *     used and the task type is set correctly (RETRIEVAL_QUERY for questions
@@ -20,7 +20,7 @@ const API = "https://generativelanguage.googleapis.com/v1beta";
  * Generation models, tried in order.
  *
  * Free-tier quota is per model as well as per key, and the flagship flash
- * model is the most contended — a student asking a question at a busy moment
+ * model is the most contended. A student asking a question at a busy moment
  * gets a 429 from it and a perfectly good answer from the next one down. The
  * better model leads here (unlike ingestion) because this text is read by a
  * student and marking quality matters more than throughput.
@@ -45,7 +45,7 @@ const KEYS = (Deno.env.get("GEMINI_API_KEYS") ?? Deno.env.get("GEMINI_API_KEY") 
   .filter(Boolean);
 
 if (KEYS.length === 0) {
-  console.warn("GEMINI_API_KEY / GEMINI_API_KEYS is not set — AI routes will fail.");
+  console.warn("GEMINI_API_KEY / GEMINI_API_KEYS is not set: AI routes will fail.");
 }
 
 let keyCursor = 0;
@@ -90,7 +90,7 @@ async function callGemini(
 
     if (res.ok) return res;
 
-    // 429 means this model's quota is spent — for the day, not for the next
+    // 429 means this model's quota is spent: for the day, not for the next
     // few seconds. Backing off cannot fix it and only delays the fallback to a
     // model that would have answered immediately, so give up on this one at
     // once. 503/500 are genuine transients and do deserve a retry.
@@ -148,7 +148,7 @@ export async function embedBatch(
 
 /**
  * Scale to unit length. Vectors truncated below the model's native width come
- * back un-normalised, and the ingestion pipeline normalises before storing —
+ * back un-normalised, and the ingestion pipeline normalises before storing
  * queries must be treated identically or the two live in different spaces.
  */
 export function normalise(values: number[]): number[] {
@@ -210,7 +210,7 @@ export async function generate(prompt: string, o: GenerateOptions = {}): Promise
       data = await res.json();
     } catch (e) {
       lastError = e instanceof Error ? e : new Error(String(e));
-      continue;   // out of quota or unavailable — fall through to the next
+      continue;   // out of quota or unavailable: fall through to the next
     }
     const candidate = data?.candidates?.[0];
     const text = (candidate?.content?.parts ?? [])
@@ -280,7 +280,7 @@ export async function* generateStream(
         const parts = chunk?.candidates?.[0]?.content?.parts ?? [];
         for (const p of parts) if (p.text) yield p.text as string;
       } catch {
-        /* partial frame — the next read completes it */
+        /* partial frame. The next read completes it */
       }
     }
   }

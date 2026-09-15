@@ -3,7 +3,7 @@
  *
  * This is the join no public dataset gives you, and it is what makes "mark my
  * answer" possible. Both sides are parsed independently from two different
- * PDFs whose numbering agrees in principle and disagrees in practice —
+ * PDFs whose numbering agrees in principle and disagrees in practice
  * "4(b)(ii)" in the paper can appear as "4(b)(ii)", "4 b ii", "4(b)ii" or
  * "4bii" in the scheme.
  *
@@ -62,7 +62,7 @@ export function pairQuestions(questions, msRows) {
     }
 
     // 3. Whole-question fallback: attach the root row, but only when the
-    //    question has no parts — otherwise every part would get the same
+    //    question has no parts: otherwise every part would get the same
     //    scheme and marking would be nonsense.
     if (!qp && !qs) {
       const rootRow = byKey.get(qn);

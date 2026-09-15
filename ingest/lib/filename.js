@@ -49,7 +49,7 @@ export function parseFilename(name) {
 /**
  * Tolerate the hand-renamed files people actually have on disk.
  *
- * Word boundaries are useless here — underscores are word characters, so
+ * Word boundaries are useless here. Underscores are word characters, so
  * `\b(\d{4})\b` never matches the code in `0625_june_2019_ms.pdf` and happily
  * matches the *year* in `physics 2019 june.pdf`. Digit-run boundaries are used
  * instead, and any 4-digit run that looks like a year is rejected as a code.

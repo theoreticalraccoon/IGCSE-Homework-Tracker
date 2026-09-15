@@ -1,5 +1,5 @@
 /**
- * Settings — subjects, appearance, allowance, account.
+ * Settings: subjects, appearance, allowance, account.
  *
  * The allowance is shown rather than hidden until it runs out: Markwise runs on
  * a free Gemini tier shared by everyone on the deployment, and a student who

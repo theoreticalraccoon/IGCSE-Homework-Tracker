@@ -4,7 +4,7 @@ Everything the pipeline needs is carried in the **filename**. Get the names righ
 command ingests a whole subject. Get them wrong and files are skipped with a warning.
 
 You do not send the papers to me. You put them in a folder on your machine and run the
-ingestion CLI against it — the PDFs never leave your computer except as extracted text sent
+ingestion CLI against it. The PDFs never leave your computer except as extracted text sent
 to Gemini for parsing and embedding.
 
 ---
@@ -36,13 +36,13 @@ Worked examples:
 
 This is the exact scheme Cambridge and every past-paper mirror already use, so **downloaded
 Cambridge files usually need no renaming at all.** Other boards need the board
-prefix added — see *Non-Cambridge* below.
+prefix added: see *Non-Cambridge* below.
 
 ---
 
 ## Folder layout
 
-One flat folder per subject is simplest. Nested folders work too — the CLI walks
+One flat folder per subject is simplest. Nested folders work too. The CLI walks
 subdirectories.
 
 ```
@@ -59,7 +59,7 @@ ingest/pdfs/
 
 **The question paper and its mark scheme must be in the same run.** They are matched by
 subject + session + year + paper + variant. A question paper ingested without its mark scheme
-is searchable but can never be marked — and re-running later with the mark scheme present
+is searchable but can never be marked. And re-running later with the mark scheme present
 will not retroactively pair it unless the question paper is re-ingested (change or re-add the
 file so its hash differs, or delete its rows).
 
@@ -73,13 +73,13 @@ file so its hash differs, or delete its rows).
    work. **Ingest it before the papers.**
 2. **Question paper + mark scheme pairs** (`_qp` and `_ms`). Always together. Without the
    mark scheme, marking is impossible and that is the flagship feature.
-3. **Examiner reports** (`_er`). Optional but valuable — they are the source of "most
+3. **Examiner reports** (`_er`). Optional but valuable. They are the source of "most
    candidates lost marks here by…", which no general chatbot has.
 4. **Grade thresholds** (`_gt`). Optional. Only needed for predicted grades.
 
 ### How much to start with
 
-Do **one subject, two sessions** first — about 8 files. That proves the parser works on your
+Do **one subject, two sessions** first: about 8 files. That proves the parser works on your
 actual PDFs before you spend hours collecting. Then scale.
 
 | Scope | Files | Rough ingestion time |
@@ -89,14 +89,14 @@ actual PDFs before you spend hours collecting. Then scale.
 | 1 subject, 10 years, all variants | ~250 | 1.5–3 hours |
 | 6 subjects, 10 years | ~1,500 | most of a day |
 
-Times assume two Gemini keys. Rate limits, not CPU, are the bottleneck — a second free key
+Times assume two Gemini keys. Rate limits, not CPU, are the bottleneck. A second free key
 roughly halves the wall clock.
 
 ### Which papers are worth having
 
 - **Recent years first.** Syllabuses change; a 2011 question may be off-syllabus now. The last
   5–8 years is the sweet spot.
-- **All variants.** Variants 1/2/3 are different papers with different questions — all useful.
+- **All variants.** Variants 1/2/3 are different papers with different questions: all useful.
 - **Extended tier** if the student sits Extended (papers 2, 4, 6 for sciences).
 - Skip `_in` (inserts) and `_ci` (confidential instructions); they carry no markable questions.
 
@@ -140,7 +140,7 @@ Done.
 ```
 
 **The number that matters is "with mark scheme".** Above ~85% means the pipeline is working.
-Below ~50% means something is wrong — see below.
+Below ~50% means something is wrong: see below.
 
 ---
 
@@ -150,10 +150,10 @@ Below ~50% means something is wrong — see below.
 |---|---|---|
 | `N file(s) had unrecognisable names` | Filenames don't match the pattern | Rename them, or accept best-effort parsing |
 | `no question paper, only a mark scheme` | The `_qp` file is missing or misnamed | Add it |
-| `layout defeated the parser — retrying with the model` | Normal on some papers. Not an error | — |
+| `layout defeated the parser, retrying with the model` | Normal on some papers. Not an error |, |
 | `no questions extracted` | Scanned PDF with no text layer | `npm install canvas`, re-run with `--ocr` |
 | Very low "with mark scheme" | Mark scheme PDFs missing, or MS layout unparsed | Check both files are present; ensure `INGEST_LLM_PARSE=1` |
-| `embedding batch failed` | Gemini rate limit | Harmless — run `node ingest.js reembed` afterwards |
+| `embedding batch failed` | Gemini rate limit | Harmless: run `node ingest.js reembed` afterwards |
 
 Send me the console output of a run and I can tell you which of these it is, and tune
 [`ingest/lib/parse.js`](../ingest/lib/parse.js) against the specific layout if needed.
@@ -162,13 +162,13 @@ Send me the console output of a run and I can tell you which of these it is, and
 
 ## Non-Cambridge and school subjects
 
-Courses with no syllabus of their own — Extra Maths, Single Science Physics, Further Pure
-Maths — are set up to **borrow another subject's corpus** via `subjects.corpus_code`
+Courses with no syllabus of their own: Extra Maths, Single Science Physics, Further Pure
+Maths: are set up to **borrow another subject's corpus** via `subjects.corpus_code`
 (see migration `20260914000300`). Ingest `0580` and Extra Maths students get 0580's questions;
 you do not ingest anything separately for them.
 
-Edexcel, AQA and OCR are supported. Prefix the code with the board — `E-`
-Edexcel, `A-` AQA, `O-` OCR, `X-` a school course — so it can never collide
+Edexcel, AQA and OCR are supported. Prefix the code with the board: `E-`
+Edexcel, `A-` AQA, `O-` OCR, `X-` a school course. So it can never collide
 with a Cambridge four-digit code:
 
 ```

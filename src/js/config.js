@@ -3,7 +3,7 @@
  *
  * The publishable key is meant to be public: every table is protected by
  * row-level security, so it grants nothing on its own. The Gemini key is NOT
- * here and never will be — AI calls go through edge functions, which is the
+ * here and never will be: AI calls go through edge functions, which is the
  * whole reason the app has a server side at all.
  */
 

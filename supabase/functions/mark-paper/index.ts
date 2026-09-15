@@ -4,7 +4,7 @@
  * Marks a whole past paper from photos or a scan of the student's handwriting.
  *
  * The student chooses a subject and uploads their paper. Which paper it is,
- * they should not have to tell us — it is printed on the front of the thing
+ * they should not have to tell us. It is printed on the front of the thing
  * they just photographed. So the first pass reads the paper's identity and
  * transcribes the answers in one call, and the identity is matched against the
  * corpus for that subject.
@@ -16,7 +16,7 @@
  *      the most expensive part of the request, so they are sent exactly once.
  *   2. Mark. The transcribed text is marked in small batches against the real
  *      mark schemes stored for that paper. Batching keeps each response inside
- *      the output limit — a 25-question paper marked in one call runs out of
+ *      the output limit. A 25-question paper marked in one call runs out of
  *      room halfway down and returns truncated JSON.
  *
  * Every question is marked against its own stored scheme. A question with no
@@ -47,7 +47,7 @@ Transcribing the answers:
 - One entry per question the student attempted, in the order they appear.
 - questionNo is the number the student wrote against the answer: "4", "4(b)",
   "4(b)(ii)". Copy the paper's numbering exactly.
-- answer is what they wrote, TRANSCRIBED VERBATIM — including working,
+- answer is what they wrote, TRANSCRIBED VERBATIM: including working,
   crossings-out that are still legible, units and wrong answers. You are not
   correcting or improving it; a transcription that tidies up the student's
   mistakes gets them marks they did not earn.
@@ -329,7 +329,7 @@ interface HeldPaper {
  * Which stored paper is the student holding?
  *
  * Scored rather than matched exactly, because a photographed cover page
- * rarely yields every field — a cropped shot may show the paper number but
+ * rarely yields every field. A cropped shot may show the paper number but
  * not the year. Year and paper number carry the most weight; a candidate that
  * contradicts a field we did read is rejected outright, since marking against
  * the wrong paper is the failure this whole app exists to avoid.

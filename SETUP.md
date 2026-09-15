@@ -1,4 +1,4 @@
-# Markwise — setup
+# Markwise: setup
 
 Four steps. The first two are required; the app runs as a planner after step 2 and gains its
 AI features after step 3. Step 4 is the corpus, which is what makes the AI worth using.
@@ -23,7 +23,7 @@ saying whether anything was left unmapped. Skip it only on a brand-new project w
 
 Each is safe to re-run.
 
-> **`extension "vector" is not available`** — enable it under **Database → Extensions →
+> **`extension "vector" is not available`**: enable it under **Database → Extensions →
 > `vector`**, then run file 2 again.
 
 Or with the CLI:
@@ -58,7 +58,7 @@ python -m http.server 8000
 Then open <http://localhost:8000>.
 
 If you are using your own Supabase project, change `SUPABASE_URL` and `SUPABASE_KEY` at the
-top of [`src/js/config.js`](src/js/config.js). The publishable key is meant to be public —
+top of [`src/js/config.js`](src/js/config.js). The publishable key is meant to be public
 every table is protected by row-level security, so on its own it grants nothing.
 
 Deploy by uploading the folder to any static host (GitHub Pages, Netlify, Cloudflare Pages,
@@ -66,7 +66,7 @@ Vercel). There is no server component other than the edge functions below.
 
 ---
 
-## 3. AI — edge functions
+## 3. AI: edge functions
 
 The Gemini key must never be in the browser. It lives as a Supabase function secret.
 
@@ -75,7 +75,7 @@ The Gemini key must never be in the browser. It lives as a Supabase function sec
 #    Free-tier limits are PER KEY, so two keys double your throughput.
 supabase secrets set GEMINI_API_KEYS="key1,key2"
 
-# Optional. GEMINI_CHAT_MODEL is a FALLBACK CHAIN, tried left to right — free
+# Optional. GEMINI_CHAT_MODEL is a FALLBACK CHAIN, tried left to right: free
 # tier quota is per model as well as per key, so when one is exhausted the
 # request continues on the next instead of failing.
 supabase secrets set GEMINI_CHAT_MODEL="gemini-3.5-flash,gemini-3-flash-preview,gemini-3.5-flash-lite"
@@ -89,7 +89,7 @@ supabase functions deploy mock
 ```
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are injected by the
-platform — you do not set those.
+platform. You do not set those.
 
 ### Daily limits
 
@@ -107,7 +107,7 @@ allowance in **Settings**.
 ## 4. Corpus
 
 Without this the planner works fully and the AI screens say plainly that they have nothing to
-ground on — which is the honest behaviour, and better than answering anyway.
+ground on. Which is the honest behaviour, and better than answering anyway.
 
 ```bash
 cd ingest
@@ -117,11 +117,11 @@ cp .env.example .env
 
 Fill in `.env`:
 
-- `SUPABASE_URL` — same project
-- `SUPABASE_SERVICE_ROLE_KEY` — **Project Settings → API → service_role**. This bypasses RLS.
+- `SUPABASE_URL`: same project
+- `SUPABASE_SERVICE_ROLE_KEY`: **Project Settings → API → service_role**. This bypasses RLS.
   It belongs in this file and nowhere else. Never put it in `src/` or in a function that
   handles user input.
-- `GEMINI_API_KEYS` — one or more, comma-separated
+- `GEMINI_API_KEYS`. One or more, comma-separated
 
 See **[docs/PAPERS.md](docs/PAPERS.md)** for file naming, folder layout, what to collect and
 how long it takes.
@@ -129,7 +129,7 @@ how long it takes.
 Then, per subject:
 
 ```bash
-# Syllabus first — its section names become the topic vocabulary.
+# Syllabus first. Its section names become the topic vocabulary.
 node ingest.js syllabus --file ./pdfs/0625_y25_sy.pdf
 
 # Papers. Put question papers, mark schemes and examiner reports in one folder;
@@ -154,7 +154,7 @@ Expect to see something like:
 ```
 
 A low "with mark scheme" count means the mark scheme PDFs are missing from the folder, or
-that paper's layout defeated the parser — try again with `INGEST_LLM_PARSE=1` (the default).
+that paper's layout defeated the parser: try again with `INGEST_LLM_PARSE=1` (the default).
 
 For scanned papers add `--ocr` and install the optional renderer:
 
@@ -183,14 +183,14 @@ Session letters: `s` = May/June, `w` = Oct/Nov, `m` = Feb/March.
 
 | Symptom | Cause |
 |---|---|
-| "No ingested subjects" everywhere | No corpus yet — step 4 |
+| "No ingested subjects" everywhere | No corpus yet: step 4 |
 | Ask returns "nothing matched" | Chunks have no embeddings: `node ingest.js reembed` |
-| "Daily limit reached" | Expected — raise it in `ai_limits`, or wait for midnight UTC |
+| "Daily limit reached" | Expected: raise it in `ai_limits`, or wait for midnight UTC |
 | Mark says "no mark scheme" | That question is unpaired. Normal for some papers; the question is still searchable |
 | Functions return 401 | Signed-out session, or the function was deployed with `--no-verify-jwt` |
 | Functions return 500 mentioning Gemini | `GEMINI_API_KEYS` not set as a secret |
 | `model … is not found` or `no longer available` | Google retired it. Ask your key what it can use: `curl "https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_KEY"` |
-| Everything 429s on one model | That model's daily quota is spent. The chain covers it — add another model or another key |
+| Everything 429s on one model | That model's daily quota is spent. The chain covers it: add another model or another key |
 
 Useful:
 

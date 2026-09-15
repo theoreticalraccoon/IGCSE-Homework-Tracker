@@ -1,5 +1,5 @@
 -- ============================================================================
--- Markwise — daily caps for the two upload routes.
+-- Markwise: daily caps for the two upload routes.
 --
 -- Both send whole documents to Gemini, so they are far more expensive per call
 -- than a chat message and are capped much lower.

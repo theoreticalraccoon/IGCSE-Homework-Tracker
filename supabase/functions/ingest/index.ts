@@ -3,14 +3,14 @@
  *
  * Adds one past-paper PDF to the corpus, straight from the browser.
  *
- * The student supplies a file and nothing else — no filename convention, no
+ * The student supplies a file and nothing else. No filename convention, no
  * subject code, no CLI. Gemini reads the cover page to work out what the
  * document is, then extracts either the questions or the marking points,
  * and the result is embedded and stored.
  *
  * Mark schemes are matched to a question paper that is already in the corpus
  * and fill in its `ms_content`. A mark scheme that arrives first is stored on
- * its own so the question paper can pair with it later — the student should
+ * its own so the question paper can pair with it later. The student should
  * not have to care which order they dragged the files in.
  *
  * Body: { file: { mimeType, data }, fileName? }
@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
       rows: rows.length,
       attached,
       message: attached > 0
-        ? `Mark scheme added — ${attached} question${attached === 1 ? "" : "s"} can now be marked.`
+        ? `Mark scheme added: ${attached} question${attached === 1 ? "" : "s"} can now be marked.`
         : "Mark scheme saved. Add its question paper and they will be paired automatically.",
     });
   }
@@ -232,7 +232,7 @@ Deno.serve(async (req) => {
 
   // Mark schemes this paper already had, before its rows are replaced.
   // Re-adding a question paper must never silently destroy pairings that took
-  // a separate upload — or a whole CLI run — to establish.
+  // a separate upload, or a whole CLI run, to establish.
   const existing = await loadExistingMarkSchemes(admin, paperId);
   await admin.from("chunks").delete().eq("paper_id", paperId);
 

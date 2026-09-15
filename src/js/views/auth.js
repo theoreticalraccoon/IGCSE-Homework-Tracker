@@ -11,7 +11,7 @@ import { toast } from "../ui/feedback.js";
 import { sb } from "../api/client.js";
 import { store } from "../store.js";
 import { saveProfile } from "../api/data.js";
-import { APP_NAME, APP_TAGLINE } from "../config.js";
+import { APP_TAGLINE } from "../config.js";
 
 let mode = "signin";
 
@@ -21,14 +21,14 @@ export function renderAuth() {
   const screen = byId("authScreen");
   screen.innerHTML = `
     <div class="auth-card">
-      <div class="brand-mark">
-        <span class="brand-glyph" aria-hidden="true">✓</span>
-        <span class="brand-name">${esc(APP_NAME)}</span>
+      <div class="brand-lockup">
+        <img src="src/assets/markwise-mark.svg" alt="" width="60" height="60">
+        <span class="brand-name lg">Mark<span>wise</span></span>
       </div>
       <p class="brand-tagline">${esc(APP_TAGLINE)}</p>
 
       <h1 id="authTitle">Sign in</h1>
-      <p class="auth-sub" id="authSub">Welcome back — pick up where you left off.</p>
+      <p class="auth-sub" id="authSub">Welcome back. Pick up where you left off.</p>
 
       <form id="authForm" novalidate>
         <label class="field">
@@ -65,7 +65,7 @@ function applyMode() {
   byId("authTitle").textContent = up ? "Create your account" : "Sign in";
   byId("authSub").textContent = up
     ? "One quick step and you're in."
-    : "Welcome back — pick up where you left off.";
+    : "Welcome back. Pick up where you left off.";
   byId("authSubmit").textContent = up ? "Create account" : "Sign in";
   byId("authPassword").setAttribute("autocomplete", up ? "new-password" : "current-password");
   byId("authForgotWrap").hidden = up;
@@ -152,12 +152,12 @@ async function forgot() {
 function friendly(err) {
   const m = (err?.message ?? String(err)).toLowerCase();
   if (m.includes("invalid login")) return "That email and password don't match.";
-  if (m.includes("already registered")) return "That email already has an account — sign in instead.";
-  if (m.includes("email not confirmed")) return "Confirm your email first — check your inbox.";
+  if (m.includes("already registered")) return "That email already has an account: sign in instead.";
+  if (m.includes("email not confirmed")) return "Confirm your email first: check your inbox.";
   if (m.includes("password should be at least")) return "Use a password of at least 6 characters.";
   if (m.includes("invalid email") || m.includes("unable to validate email")) return "That email doesn't look right.";
   if (m.includes("signups not allowed")) return "Sign-ups are turned off for this deployment.";
-  if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts — wait a moment.";
+  if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts: wait a moment.";
   return err?.message ?? "Something went wrong.";
 }
 
@@ -236,7 +236,7 @@ export function renderOnboarding(onDone) {
     <div class="auth-card onboard-card">
       <h1>Choose your subjects</h1>
       <p class="auth-sub">
-        Pick what you take. Subjects with ingested past papers are marked — those are the
+        Pick what you take. Subjects with ingested past papers are marked. Those are the
         ones Markwise can mark and quiz you on.
       </p>
       <input type="search" id="onboardSearch" placeholder="Search subjects…" autocomplete="off" data-autofocus>

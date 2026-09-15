@@ -4,7 +4,7 @@
  * This is the hardest part of the project and the reason a general chatbot
  * cannot do what Markwise does. Two strategies run in order:
  *
- *   1. A deterministic parser. Exam papers are rigidly formatted — a question
+ *   1. A deterministic parser. Exam papers are rigidly formatted. A question
  *      starts at column zero with "3", parts are "(a)", sub-parts are "(ii)",
  *      and the mark allocation is "[4]" at the end of the last line of the
  *      part. When this works it is exact, free, and fast.
@@ -59,7 +59,7 @@ export function cleanLines(text) {
 
 /**
  * Strip the front matter. Both boards open with a cover page of candidate
- * details and instructions, and Edexcel maths papers add a formulae sheet —
+ * details and instructions, and Edexcel maths papers add a formulae sheet
  * none of it is markable and all of it pollutes retrieval.
  */
 export function dropCoverPage(pages) {
@@ -207,7 +207,7 @@ export function parseQuestionPaper(pages) {
         sub = null;
         partStem = "";
         startPage = page.n;
-        // "(a) (i) Work out …" — the sub-part can share the line too.
+        // "(a) (i) Work out …". The sub-part can share the line too.
         const peeled = peelLabels(pm[2] ?? "", { partsAlreadyTaken: true });
         sub = peeled.sub;
         if (peeled.rest) buf.push(peeled.rest);
@@ -225,7 +225,7 @@ export function parseQuestionPaper(pages) {
 /**
  * One chunk per question part, keeping the first occurrence.
  *
- * A repeated question number is never legitimate — it means the parser lost
+ * A repeated question number is never legitimate. It means the parser lost
  * track of where it was. Keeping the duplicates would put the same question in
  * a mock paper twice and split its marks across several rows, so they are
  * dropped here and counted, so `looksParsed` can send a badly-confused paper to
@@ -279,7 +279,7 @@ function peelLabels(text, { partsAlreadyTaken = false } = {}) {
  * Is this the next question number?
  *
  * Strictly "current + 1" is too brittle. When one question's opening line is
- * missed — a diagram-heavy stem, an odd font — the parser sticks on the
+ * missed, a diagram-heavy stem, an odd font, the parser sticks on the
  * previous number and every subsequent "(a)" and "(b)" is attributed to it,
  * producing eight copies of "2(b)" with the wrong text. Allowing a small
  * forward jump lets it resynchronise, while staying forward-only stops a
@@ -293,7 +293,7 @@ function isNextQuestion(n, current) {
 /**
  * Does the text after a question number look like the start of a question?
  *
- * A part label always does. Otherwise it has to be long enough to be prose —
+ * A part label always does. Otherwise it has to be long enough to be prose
  * which rejects the units and measurements that litter diagrams ("12 m",
  * "9 cm") without needing to know what the diagram shows.
  */
@@ -309,12 +309,12 @@ function opensAQuestion(rest) {
  * Text extraction flattens them, but the question ref reliably starts a row and
  * the mark count reliably ends it, which is enough to segment on.
  */
-// The `\*?` is for starred questions ("1*" — assessed for written
+// The `\*?` is for starred questions ("1*": assessed for written
 // communication), which otherwise fail to match and lose the whole question.
 const MS_ROW = /^(\d{1,2})\*?\s*(?:\(([a-h])\))?\s*(?:\(((?:i|v|x)+)\))?\s+(.*)$/i;
 
 // Edexcel restates the table header above every question. Where that happens
-// it is the most reliable row boundary in the document — far better than the
+// it is the most reliable row boundary in the document: far better than the
 // numbering, because working like "2 card = 6" is indistinguishable from the
 // start of question 2 by any other means.
 const MS_HEADER = /^(q|question)\b.*\b(answer|working)\b.*\bmarks?\b/i;
@@ -384,7 +384,7 @@ export function parseMarkScheme(pages) {
         // Mark schemes are printed in question order, and flattening a table
         // to text turns working like "3 × n + k" into something that looks
         // exactly like the start of question 3. Requiring the number to be the
-        // next one — or the same one with a new part label — rejects those
+        // next one, or the same one with a new part label, rejects those
         // without needing to understand the mathematics.
         const startsNewQuestion = headerGated
           ? afterHeader
@@ -406,7 +406,7 @@ export function parseMarkScheme(pages) {
         continue;
       }
 
-      // "(ii) 1 B1 …" — inherits both the question and the part above it.
+      // "(ii) 1 B1 …": inherits both the question and the part above it.
       const so = line.match(MS_SUB_ONLY);
       if (so && root !== null) {
         open(root, part, so[1], so[2]);
@@ -468,7 +468,7 @@ Rules:
 
 /**
  * Re-parse pages with the model. Used when the deterministic parser produced
- * nothing usable — typically OCR'd scans, or maths papers whose layout is
+ * nothing usable: typically OCR'd scans, or maths papers whose layout is
  * two-column.
  */
 export async function llmParseQuestions(pages, hint = "") {
@@ -517,7 +517,7 @@ You transcribe IGCSE mark scheme tables into rows.
 Rules:
 - Copy marking points VERBATIM, including "accept", "reject", "or equivalent",
   "ora", "owtte" and any alternatives separated by "/".
-- Keep the guidance column — it is where the accept/reject rules live.
+- Keep the guidance column. It is where the accept/reject rules live.
 - One row per question part, matching the question numbering of the paper.
 - marks is the mark allocation for that part.
 - Never paraphrase. A paraphrased mark scheme cannot be marked against.

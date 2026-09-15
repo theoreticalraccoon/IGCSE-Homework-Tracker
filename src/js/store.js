@@ -77,7 +77,7 @@ export function subjectName(code) {
  * A school's "Extra Maths" or "Single Science Physics" class has no syllabus
  * of its own, but the questions its students need are 0580's and 0625's. The
  * planner keeps the course separate; retrieval follows the pointer. Anything
- * sent to the corpus — search, ask, mark, mock — must go through this.
+ * sent to the corpus, search, ask, mark, mock, must go through this.
  */
 export function corpusCode(code) {
   const row = store.subjects.find((s) => s.code === code);

@@ -6,7 +6,7 @@ import { callFunction, streamFunction } from "./client.js";
  * Streamed, grounded answer.
  *
  * `onCitations` fires before any text, so the sources panel can render while
- * the model is still thinking — which is also the honest moment to tell the
+ * the model is still thinking. Which is also the honest moment to tell the
  * student that nothing was retrieved.
  */
 export function ask({ question, subject, mode = "ask", threadId, history = [] }, handlers, options) {
@@ -31,7 +31,7 @@ export function generateMock(body, options) {
   return callFunction("mock", body, options);
 }
 
-/** Whole-paper marking from photos. Slow by nature — two model passes. */
+/** Whole-paper marking from photos. Slow by nature: two model passes. */
 export function markPaper(body, options) {
   return callFunction("mark-paper", body, options);
 }
@@ -48,7 +48,7 @@ export function explainError(error) {
     return error.message ?? "You have used today's AI allowance. It resets at midnight UTC.";
   }
   if (error?.status === 401) return "Your session expired. Sign in again.";
-  // Routes that explain themselves — pass their wording straight through.
+  // Routes that explain themselves: pass their wording straight through.
   for (const code of ["empty_corpus", "not_found", "no_markscheme", "unrecognised", "unsupported", "no_answers"]) {
     if (error?.code === code) return error.message;
   }

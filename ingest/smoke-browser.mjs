@@ -1,5 +1,5 @@
 /**
- * Browser smoke test — drives the real UI in headless Chromium.
+ * Browser smoke test: drives the real UI in headless Chromium.
  *
  *   npm run test:browser        (from the repo root)
  *
@@ -24,7 +24,7 @@ import { resolve } from "node:path";
 
 // fileURLToPath, not url.pathname: on Windows the latter yields "/C:/Users/…"
 // with forward slashes, which never matches the back-slashed paths join()
-// produces — so every request fails the containment check with a 403.
+// produces. So every request fails the containment check with a 403.
 const REPO = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const URL_SB = process.env.SUPABASE_URL;
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -165,7 +165,7 @@ try {
   await step("mark a paper: three steps render", async () => {
     await page.click(String.raw`[data-nav="markpaper"]`);
     await page.waitForSelector("#mpDrop", { timeout: 20000 });
-    if (await page.locator("#mpPaper").count()) note("markpaper", "still asks which paper — should read it from the upload");
+    if (await page.locator("#mpPaper").count()) note("markpaper", "still asks which paper: should read it from the upload");
     const disabled = await page.locator("#mpGo").isDisabled();
     if (!disabled) note("markpaper", "Mark button is enabled with nothing uploaded");
   });

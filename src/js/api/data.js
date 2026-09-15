@@ -21,7 +21,7 @@ export async function loadCatalogue() {
   ]);
   fail("Could not load subjects", subjects.error);
   store.subjects = subjects.data ?? [];
-  // Coverage is a nicety — a missing view must not block sign-in.
+  // Coverage is a nicety. A missing view must not block sign-in.
   store.coverage = coverage.error ? [] : (coverage.data ?? []);
   return store.subjects;
 }
@@ -178,7 +178,7 @@ export async function searchLibrary({ subject, query = "", topic = null, limit =
 
   if (subject) q = q.eq("subject_code", subject);
   if (topic) q = q.eq("topic", topic);
-  // Keyword search only — semantic search costs a Gemini call, so it belongs
+  // Keyword search only: semantic search costs a Gemini call, so it belongs
   // to Ask, not to browsing.
   if (query.trim()) q = q.textSearch("fts", query.trim(), { type: "websearch" });
 
@@ -263,7 +263,7 @@ export async function predictGrade(subject, paperNo, pct) {
     p_paper_no: paperNo,
     p_pct: pct,
   });
-  if (error) return null; // no boundaries ingested — not an error worth showing
+  if (error) return null; // no boundaries ingested. Not an error worth showing
   return data ?? null;
 }
 

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Markwise — retrieval-grounded iGCSE assistant.
+-- Markwise: retrieval-grounded iGCSE assistant.
 -- Adds the exam corpus (papers, mark schemes, syllabuses), the vector index
 -- used for RAG, and the per-user study record built on top of it.
 --
@@ -10,7 +10,7 @@ create extension if not exists pgcrypto;
 create extension if not exists vector;
 
 -- ---------------------------------------------------------------------------
--- 0. Planner upgrades — the original tracker only knew school/tuition homework.
+-- 0. Planner upgrades. The original tracker only knew school/tuition homework.
 -- ---------------------------------------------------------------------------
 
 alter table public.tasks add column if not exists notes         text;
@@ -66,7 +66,7 @@ create policy "tuition_own" on public.tuition_sessions
 
 
 -- ---------------------------------------------------------------------------
--- 2. The corpus — public exam content, readable by any signed-in user,
+-- 2. The corpus: public exam content, readable by any signed-in user,
 --    writable only by the ingestion pipeline (service-role key).
 -- ---------------------------------------------------------------------------
 
@@ -106,13 +106,13 @@ create table if not exists public.chunks (
   paper_id      uuid not null references public.papers (id) on delete cascade,
   subject_code  text not null,
   kind          text not null check (kind in ('question','markscheme','syllabus','examiner_report')),
-  paper_code    text,                 -- '0625_s19_qp_42' — what citations show
+  paper_code    text,                 -- '0625_s19_qp_42': what citations show
   year          integer,
   session       text,
   paper_no      integer,
   variant       integer,
   question_no   text,                 -- '4(b)(ii)'
-  question_root text,                 -- '4'  — groups parts of one question
+  question_root text,                 -- '4': groups parts of one question
   marks         integer,
   command_word  text,                 -- explain | calculate | describe …
   topic         text,
@@ -165,7 +165,7 @@ alter table public.papers           enable row level security;
 alter table public.chunks           enable row level security;
 alter table public.grade_boundaries enable row level security;
 
--- Exam content is public knowledge — any signed-in user may read it, nobody
+-- Exam content is public knowledge: any signed-in user may read it, nobody
 -- may write it through the anon/authenticated key.
 drop policy if exists "subjects_read" on public.subjects;
 create policy "subjects_read" on public.subjects for select to authenticated using (true);
@@ -181,7 +181,7 @@ create policy "gb_read" on public.grade_boundaries for select to authenticated u
 
 
 -- ---------------------------------------------------------------------------
--- 3. Retrieval — hybrid (vector + full-text) fused with Reciprocal Rank Fusion.
+-- 3. Retrieval: hybrid (vector + full-text) fused with Reciprocal Rank Fusion.
 --
 -- Pure vector search misses exact identifiers ("0625_s19_qp_42", "Q4(b)");
 -- pure keyword search misses paraphrase ("why does it slow down" → friction).
@@ -315,7 +315,7 @@ language sql stable security definer set search_path = public as $fn$
   order by sib.question_no;
 $fn$;
 
--- Distinct topics for a subject — powers the drill/mock topic pickers.
+-- Distinct topics for a subject: powers the drill/mock topic pickers.
 create or replace function public.subject_topics(p_subject text)
 returns table (topic text, questions bigint, marks bigint)
 language sql stable security definer set search_path = public as $fn$
@@ -326,7 +326,7 @@ language sql stable security definer set search_path = public as $fn$
   order by 2 desc;
 $fn$;
 
--- Random real questions matching a spec — the raw material for a mock paper.
+-- Random real questions matching a spec. The raw material for a mock paper.
 create or replace function public.sample_questions(
   p_subject text,
   p_topics  text[] default null,
@@ -353,7 +353,7 @@ language sql stable security definer set search_path = public as $fn$
 $fn$;
 
 -- "Give me more questions like this one." Pure vector neighbours of an
--- existing chunk — no embedding call needed, so this route costs no quota.
+-- existing chunk. No embedding call needed, so this route costs no quota.
 create or replace function public.similar_chunks(
   p_chunk_id uuid,
   p_limit    int default 6,
@@ -387,7 +387,7 @@ grant execute on function public.sample_questions  to authenticated, service_rol
 
 
 -- ---------------------------------------------------------------------------
--- 4. The study record — everything the app learns about one student.
+-- 4. The study record. Everything the app learns about one student.
 -- ---------------------------------------------------------------------------
 
 -- One marked answer.
@@ -458,7 +458,7 @@ create table if not exists public.chat_messages (
 create index if not exists chat_threads_user_idx   on public.chat_threads (user_id, updated_at desc);
 create index if not exists chat_messages_thread_idx on public.chat_messages (thread_id, created_at);
 
--- Rolling mastery per syllabus topic — the thing that drives revision
+-- Rolling mastery per syllabus topic. The thing that drives revision
 -- suggestions and the "weak topics" mock generator.
 create table if not exists public.topic_mastery (
   user_id       uuid not null default auth.uid() references auth.users (id) on delete cascade,
@@ -573,7 +573,7 @@ grant execute on function public.predict_grade to authenticated;
 
 
 -- ---------------------------------------------------------------------------
--- 5. Corpus coverage — what the library screen shows, and what tells a user
+-- 5. Corpus coverage: what the library screen shows, and what tells a user
 --    honestly which subjects the AI can actually ground answers in.
 -- ---------------------------------------------------------------------------
 

@@ -4,7 +4,7 @@
  * Differs from the edge-function client in two ways that matter at ingestion
  * scale: keys are rotated round-robin across a pool (the free tier is
  * per-key, so N keys multiply throughput linearly), and 429s are treated as
- * flow control rather than errors — the pipeline slows down instead of
+ * flow control rather than errors. The pipeline slows down instead of
  * failing, because a run that dies 80% through a subject is expensive to redo.
  */
 
@@ -22,7 +22,7 @@ async function pickKey() {
     const until = cooldown.get(key) ?? 0;
     if (Date.now() >= until) return key;
   }
-  // Every key is cooling down — wait for the soonest one.
+  // Every key is cooling down: wait for the soonest one.
   const soonest = Math.min(...GEMINI_KEYS.map((k) => cooldown.get(k) ?? 0));
   await sleep(Math.max(500, soonest - Date.now()));
   return pickKey();
@@ -127,7 +127,7 @@ export async function generateJSON(prompt, schema, { system, temperature = 0, ma
       data = await call(`models/${model}:generateContent`, body);
     } catch (e) {
       lastError = e;
-      continue;   // this model is out of quota or unavailable — try the next
+      continue;   // this model is out of quota or unavailable: try the next
     }
 
     const candidate = data?.candidates?.[0];
@@ -137,7 +137,7 @@ export async function generateJSON(prompt, schema, { system, temperature = 0, ma
     // Truncated JSON is the symptom; say so plainly rather than reporting a
     // parse error that looks like the model returned nonsense.
     if (candidate?.finishReason === "MAX_TOKENS") {
-      lastError = new Error(`${model} hit the output limit before finishing the JSON — raise maxOutputTokens or send a smaller batch.`);
+      lastError = new Error(`${model} hit the output limit before finishing the JSON: raise maxOutputTokens or send a smaller batch.`);
       continue;
     }
     if (!text) {

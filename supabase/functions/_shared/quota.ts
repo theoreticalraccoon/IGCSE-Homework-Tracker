@@ -4,7 +4,7 @@
  * Checked before the Gemini call, not after, so a user who is out of quota
  * costs the project nothing. The counter lives in Postgres rather than in
  * function memory because edge functions are stateless and scale to many
- * isolates — an in-process counter would be trivially bypassed.
+ * isolates. An in-process counter would be trivially bypassed.
  */
 
 import { adminClient } from "./db.ts";

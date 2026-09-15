@@ -3,8 +3,8 @@
  *
  * Topics are what make everything personal: the weakness profile, the
  * "generate a mock on what I'm bad at" feature, and topic drilling all key off
- * this field. They must therefore come from a controlled vocabulary — the
- * subject's own syllabus sections — rather than whatever phrase the model
+ * this field. They must therefore come from a controlled vocabulary: the
+ * subject's own syllabus sections: rather than whatever phrase the model
  * feels like producing, or "Forces" and "Forces and motion" become different
  * topics and the mastery table fragments into noise.
  *
@@ -33,7 +33,7 @@ export function commandWord(text) {
   for (const w of COMMAND_WORDS) {
     // Must open a clause, not appear mid-sentence ("the state of the gas").
     // A clause opens at the start, after sentence punctuation, after a newline,
-    // or after a part label — "(i) Calculate the acceleration."
+    // or after a part label: "(i) Calculate the acceleration."
     if (new RegExp(`(^|[.;:)]\\s*|\\n\\s*)${w}\\b`).test(t)) return w;
   }
   return null;
@@ -43,7 +43,7 @@ export function commandWord(text) {
 
 /**
  * Fallback vocabularies for the common subjects, used when no syllabus PDF has
- * been ingested for that subject yet. Deliberately coarse — a dozen buckets a
+ * been ingested for that subject yet. Deliberately coarse. A dozen buckets a
  * student would recognise, matching how revision guides are organised.
  */
 const FALLBACK_TOPICS = {
@@ -145,7 +145,7 @@ export async function classifyBatch(parts, topics, subjectName) {
       { system: SYSTEM, maxOutputTokens: 4096 },
     ));
   } catch (e) {
-    console.warn(`  classification failed (${e.message}) — questions stay untagged`);
+    console.warn(`  classification failed (${e.message}): questions stay untagged`);
     return parts.map(() => ({ topic: null, refs: [] }));
   }
 

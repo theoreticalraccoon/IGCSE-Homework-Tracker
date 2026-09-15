@@ -1,4 +1,4 @@
--- Homework tracker — per-user tasks protected by row-level security.
+-- Homework tracker: per-user tasks protected by row-level security.
 -- Safe to run more than once.
 
 create extension if not exists pgcrypto;   -- gen_random_uuid()

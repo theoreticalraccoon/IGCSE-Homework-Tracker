@@ -121,7 +121,7 @@ async function papers() {
     const group = groups.get(id);
     group.files[meta.kind] = file;
     // The group inherits the identity of whichever file arrived first, which
-    // is alphabetical — "…_er_13" before "…_qp_13". The question paper is the
+    // is alphabetical: "…_er_13" before "…_qp_13". The question paper is the
     // one whose code every chunk is cited by, so it always wins.
     if (meta.kind === "qp") group.meta = meta;
   }
@@ -159,7 +159,7 @@ Done.
   without         : ${totals.unpaired}`);
 
   if (totals.unpaired > totals.paired && totals.paired > 0) {
-    warn("More unpaired than paired questions — are the mark scheme PDFs in this folder?");
+    warn("More unpaired than paired questions: are the mark scheme PDFs in this folder?");
   }
 }
 
@@ -168,7 +168,7 @@ async function ingestGroup({ meta, files }) {
   const result = { papers: 0, chunks: 0, paired: 0, unpaired: 0, skipped: 0 };
 
   if (!files.qp) {
-    warn(`${tag}: no question paper, only a mark scheme — skipping`);
+    warn(`${tag}: no question paper, only a mark scheme: skipping`);
     return result;
   }
 
@@ -195,7 +195,7 @@ async function ingestGroup({ meta, files }) {
   // --- parse questions -----------------------------------------------------
   let questions = parseQuestionPaper(body);
   if (!looksParsed(questions)) {
-    log(`  ${tag}: layout defeated the parser — retrying with the model`);
+    log(`  ${tag}: layout defeated the parser: retrying with the model`);
     const viaLlm = await llmParseQuestions(body, titleFor(meta, subject.name));
     if (viaLlm.length > questions.length) questions = viaLlm;
   }
@@ -223,12 +223,12 @@ async function ingestGroup({ meta, files }) {
     best = attempt(questions, parseMarkScheme(msPages));
 
     if (best.rate < MS_PAIR_TARGET) {
-      log(`  ${tag}: ${Math.round(best.rate * 100)}% of parts paired — re-reading the mark scheme with the model`);
+      log(`  ${tag}: ${Math.round(best.rate * 100)}% of parts paired: re-reading the mark scheme with the model`);
       try {
         const viaLlm = attempt(questions, await llmParseMarkScheme(msPages, `${tag} mark scheme`));
         if (viaLlm.rate > best.rate) best = viaLlm;
       } catch (e) {
-        warn(`${tag}: model re-read failed (${e.message}) — keeping the deterministic pairing`);
+        warn(`${tag}: model re-read failed (${e.message}). Keeping the deterministic pairing`);
       }
     }
   }
@@ -309,7 +309,7 @@ async function syllabus() {
 
   const meta = parseFilename(basename(file));
   const code = String(flags.subject ?? meta?.subjectCode ?? "");
-  if (!code) throw new Error("Could not tell which subject this is — pass --subject.");
+  if (!code) throw new Error("Could not tell which subject this is: pass --subject.");
 
   const subject = (await getSubject(code)) ?? (await ensureSubject(code));
   const hash = await sha256(file);
@@ -326,7 +326,7 @@ async function syllabus() {
 
   let sections = parseSyllabus(pages);
   if (sections.length < 5) {
-    log("Structural parse was thin — using the model.");
+    log("Structural parse was thin: using the model.");
     sections = await llmParseSyllabus(pages, subject.name);
   }
   if (!sections.length) throw new Error("No syllabus sections found.");
@@ -350,7 +350,7 @@ async function syllabus() {
   const n = await insertChunks(rows);
   log(`${n} syllabus sections ingested for ${subject.name}.`);
   log(`Topic vocabulary is now: ${[...new Set(sections.map((s) => s.topic))].join(", ")}`);
-  log(`\nIngest this subject's papers next — they will be classified against these topics.`);
+  log(`\nIngest this subject's papers next. They will be classified against these topics.`);
 }
 
 /* ------------------------------------------------------------- boundaries -- */
@@ -375,7 +375,7 @@ async function boundaries() {
     total += await upsertGradeBoundaries(rows);
     log(`  ${basename(file)}: ${rows.length} thresholds`);
   }
-  log(`\n${total} grade boundaries stored — predicted grades are now available.`);
+  log(`\n${total} grade boundaries stored: predicted grades are now available.`);
 }
 
 /* ---------------------------------------------------------------- reembed -- */
@@ -438,7 +438,7 @@ async function classify() {
     const name = info?.name ?? code;
     const topics = await topicVocabulary(db, code);
     if (!topics.length) {
-      warn(`${code}: no topic vocabulary — ingest the syllabus for this subject first`);
+      warn(`${code}: no topic vocabulary: ingest the syllabus for this subject first`);
       continue;
     }
     log(`${name}: ${items.length} question(s) against ${topics.length} topics`);
@@ -458,7 +458,7 @@ async function classify() {
           batchTagged++;
         }
       }
-      log(`  ${Math.min(i + CLASSIFY_BATCH, items.length)}/${items.length} — ${batchTagged} tagged`);
+      log(`  ${Math.min(i + CLASSIFY_BATCH, items.length)}/${items.length}: ${batchTagged} tagged`);
     }
   }
   log(`\n${tagged} question(s) classified.`);
@@ -484,7 +484,7 @@ async function status() {
         pad(r.questions, 11) +
         pad(r.syllabus_sections, 10) +
         pad(r.papers, 8) +
-        (r.from_year ? `${r.from_year}–${r.to_year}` : "—"),
+        (r.from_year ? `${r.from_year}–${r.to_year}` : ": "),
     );
   }
 
@@ -492,7 +492,7 @@ async function status() {
     .from("chunks")
     .select("id", { count: "exact", head: true })
     .is("embedding", null);
-  if (unembedded) warn(`${unembedded} chunk(s) have no embedding — run: node ingest.js reembed`);
+  if (unembedded) warn(`${unembedded} chunk(s) have no embedding: run: node ingest.js reembed`);
 
   const { count: unpaired } = await db
     .from("chunks")
@@ -525,7 +525,7 @@ async function listPdfs(dir) {
 async function maybeOcr(file, pages, tag) {
   const thin = pages.filter((p) => p.thin);
   if (!flags.ocr || thin.length === 0) return pages;
-  if (thin.length > pages.length * 0.8) log(`  ${tag}: scanned paper — OCR'ing ${thin.length} pages`);
+  if (thin.length > pages.length * 0.8) log(`  ${tag}: scanned paper: OCR'ing ${thin.length} pages`);
 
   for (const page of thin) {
     const png = await renderPagePng(file, page.n);
@@ -550,7 +550,7 @@ async function embedAll(texts) {
     try {
       out.push(...(await embedBatch(slice)));
     } catch (e) {
-      warn(`embedding batch failed (${e.message}) — those chunks land unembedded; run 'reembed' later`);
+      warn(`embedding batch failed (${e.message}). Those chunks land unembedded; run 'reembed' later`);
       out.push(...slice.map(() => null));
     }
   }

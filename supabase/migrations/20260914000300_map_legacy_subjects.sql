@@ -1,5 +1,5 @@
 -- ============================================================================
--- Markwise — migrate the original tracker's subject NAMES to syllabus CODES.
+-- Markwise: migrate the original tracker's subject NAMES to syllabus CODES.
 --
 -- The old app stored `tasks.subject` and `profiles.subjects` as display names
 -- ("Physics", "Extra Maths"). Everything in Markwise keys on the Cambridge
@@ -29,7 +29,7 @@ on conflict (code) do update set name = excluded.name;
 
 
 -- ---------------------------------------------------------------------------
--- 2. corpus_code — which subject's papers to answer this course from.
+-- 2. corpus_code. Which subject's papers to answer this course from.
 --    Null means "use my own code".
 -- ---------------------------------------------------------------------------
 
@@ -179,7 +179,7 @@ grant select on public.corpus_coverage to authenticated;
 
 
 -- ---------------------------------------------------------------------------
--- 6. What changed — read this output after running.
+-- 6. What changed: read this output after running.
 -- ---------------------------------------------------------------------------
 
 do $report$

@@ -2,7 +2,7 @@
  * Minimal DOM helpers.
  *
  * The app renders by building HTML strings and assigning innerHTML, so `esc`
- * is not optional politeness — every value that reaches a template passes
+ * is not optional politeness. Every value that reaches a template passes
  * through it. Corpus text comes from PDFs and user text comes from students;
  * both contain angle brackets.
  */

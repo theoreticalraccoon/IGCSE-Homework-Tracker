@@ -1,5 +1,5 @@
 /**
- * Planner — the original homework board, unchanged in shape.
+ * Planner. The original homework board, unchanged in shape.
  *
  * One card per subject, School and Tuition tabs, blue pen for homework and red
  * for assessments, with a coloured spine so a glance at the board tells you
@@ -46,7 +46,7 @@ function shell() {
     <header class="view-head">
       <div>
         <h1>Planner</h1>
-        <p class="view-sub" id="plannerSummary">—</p>
+        <p class="view-sub" id="plannerSummary">: </p>
       </div>
       <button class="btn-primary" id="addTask">Add task</button>
     </header>
@@ -179,7 +179,7 @@ function paint() {
 }
 
 function summarise(pending, source) {
-  if (!pending.length) return "Nothing pending — you are clear.";
+  if (!pending.length) return "Nothing pending. You are clear.";
   const hw = pending.filter((t) => t.type === "homework").length;
   const as = pending.length - hw;
   if (source === "tuition") return `${hw} homework task${hw === 1 ? "" : "s"}`;
@@ -318,7 +318,7 @@ export function openTaskForm(task = null, presetSubject = null) {
     onMount(dialog) {
       const q = (sel) => dialog.querySelector(sel);
 
-      // Tuition homework only — hide the choice rather than offer a
+      // Tuition homework only: hide the choice rather than offer a
       // combination the tab would never display.
       const syncType = () => {
         const tuition = q("#src-tuition").checked;
@@ -394,7 +394,7 @@ export async function addRevisionTask({ subject, topic, text, due }) {
     type: "homework",
     source: "school",
     text,
-    notes: topic ? `Revision — ${topic}` : null,
+    notes: topic ? `Revision: ${topic}` : null,
     due: due ?? iso(addDays(new Date(), 3)),
   });
   toast("Added to your planner.");

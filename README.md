@@ -4,7 +4,7 @@
 
 Markwise does two things. It tracks your homework, assignments, tuition and deadlines.
 And it answers, marks and quizzes you **from the real Cambridge past papers, mark schemes,
-examiner reports and syllabus documents** — not from a language model's recollection of them.
+examiner reports and syllabus documents**. Not from a language model's recollection of them.
 
 That distinction is the whole project. Ask ChatGPT or Gemini to mark a 6-mark Biology answer
 and it will produce a confident breakdown assembled from Reddit, Quora and revision forums.
@@ -24,13 +24,13 @@ points first, and every answer carries the paper code and question number so you
 - Exam-series countdown
 
 **Grounded AI** (the corpus half)
-- **Ask** — syllabus scope, content, and technique, answered from real documents with citations
-- **Mark my answer** — finds the exact question, marks point-by-point against the real mark
+- **Ask**: syllabus scope, content, and technique, answered from real documents with citations
+- **Mark my answer**: finds the exact question, marks point-by-point against the real mark
   scheme, shows what you missed, and prints the mark scheme underneath so you can audit it
-- **Mock exams** — assembled from real past questions, sat under timer, marked automatically
-- **Library** — browse and search the whole corpus; practise any question
-- **Similar questions** — vector neighbours of any question, free of charge
-- **Progress** — topic mastery built only from marks awarded against real schemes, weak-topic
+- **Mock exams**: assembled from real past questions, sat under timer, marked automatically
+- **Library**: browse and search the whole corpus; practise any question
+- **Similar questions**: vector neighbours of any question, free of charge
+- **Progress**: topic mastery built only from marks awarded against real schemes, weak-topic
   ranking, predicted grade from published grade thresholds
 - Weak topics feed straight back into mock generation and revision tasks
 
@@ -78,23 +78,23 @@ Offline:  ingest/  Node CLI  ──►  PDFs → question parts → paired mark 
 Full instructions: **[SETUP.md](SETUP.md)**, and **[docs/PAPERS.md](docs/PAPERS.md)** for how to
 name and organise the PDFs. In short:
 
-1. **Database** — run the five files in `supabase/migrations/` in the Supabase SQL editor, in
+1. **Database**: run the five files in `supabase/migrations/` in the Supabase SQL editor, in
    filename order (or `supabase db push`). The last one migrates the original tracker's
    subject names onto syllabus codes, so existing accounts keep their tasks.
-2. **Edge functions** — `supabase functions deploy ask mark mock`, then set
+2. **Edge functions**: `supabase functions deploy ask mark mock`, then set
    `GEMINI_API_KEYS` as a function secret.
-3. **Frontend** — point `SUPABASE_URL` / `SUPABASE_KEY` in `src/js/config.js` at your project
+3. **Frontend**: point `SUPABASE_URL` / `SUPABASE_KEY` in `src/js/config.js` at your project
    and serve `index.html` from any static host.
-4. **Corpus** — see below. Without it the planner works fully and the AI features tell you
+4. **Corpus**: see below. Without it the planner works fully and the AI features tell you
    honestly that they have nothing to ground on.
 
 ---
 
-## Ingestion — the hard part
+## Ingestion. The hard part
 
 The app is only as good as its corpus, and building that corpus is the real engineering
 problem. Cambridge IGCSE alone is ~30 subjects × 3 sessions a year × multiple papers and
-variants × a decade — tens of thousands of PDFs and hundreds of thousands of question parts.
+variants × a decade: tens of thousands of PDFs and hundreds of thousands of question parts.
 
 ```bash
 cd ingest
@@ -116,8 +116,8 @@ node ingest.js reembed                     # retry any chunk that failed to embe
 node ingest.js status                      # coverage report
 ```
 
-Name files the way the boards do — `0625_s19_qp_42.pdf` (Cambridge),
-`E-4MA1_s24_qp_13.pdf` (Edexcel) — and subject, session, year, paper and variant
+Name files the way the boards do: `0625_s19_qp_42.pdf` (Cambridge),
+`E-4MA1_s24_qp_13.pdf` (Edexcel). And subject, session, year, paper and variant
 are all parsed from the filename. See **[docs/PAPERS.md](docs/PAPERS.md)**.
 
 ### What makes it difficult
@@ -126,7 +126,7 @@ are all parsed from the filename. See **[docs/PAPERS.md](docs/PAPERS.md)**.
   Naive text extraction scrambles both. `lib/pdf.js` reconstructs visual lines from pdf.js text
   item coordinates before any parsing happens.
 - **Question ↔ mark scheme alignment.** No public dataset gives you this join. `lib/pair.js`
-  matches in three passes, strictest first, and leaves anything ambiguous unpaired — a question
+  matches in three passes, strictest first, and leaves anything ambiguous unpaired. A question
   marked against the *wrong* scheme is the worst failure this app can have, far worse than one
   that simply cannot be marked.
 - **Scans.** Older papers have no text layer. Pages with a thin text layer are detected and can
@@ -138,7 +138,7 @@ are all parsed from the filename. See **[docs/PAPERS.md](docs/PAPERS.md)**.
   both Gemini clients take a fallback chain and walk it on 429/503 instead of failing.
 - **Free-tier quota.** Embedding is the expensive half. Keys rotate round-robin, 429s park a key
   for a minute rather than failing the run, embeddings batch 96 at a time, and runs are
-  resumable by file hash — re-running after a crash costs almost nothing.
+  resumable by file hash: re-running after a crash costs almost nothing.
 
 Set `INGEST_LLM_PARSE=0` to run the deterministic parsers only: free, faster, and adequate for
 well-laid-out modern papers.
@@ -186,7 +186,7 @@ npm install   # esbuild, for the one block that compiles a TS module
 npm test
 ```
 
-[`test/logic.test.mjs`](test/logic.test.mjs) — 70 assertions, no database or network. It covers
+[`test/logic.test.mjs`](test/logic.test.mjs): 70 assertions, no database or network. It covers
 the places where a silent bug is expensive: filename parsing, question segmentation, the
 question-to-mark-scheme pairing rules, retrieval query parsing, dates, and HTML escaping.
 
@@ -194,7 +194,7 @@ question-to-mark-scheme pairing rules, retrieval query parsing, dates, and HTML 
 npm run test:functions
 ```
 
-[`ingest/smoke-functions.mjs`](ingest/smoke-functions.mjs) — hits the **deployed** edge functions
+[`ingest/smoke-functions.mjs`](ingest/smoke-functions.mjs): hits the **deployed** edge functions
 over HTTP as a throwaway user, then deletes them. Run it after every deploy; unit tests cannot
 catch a missing secret, a model Google has retired, or a policy that blocks the service.
 

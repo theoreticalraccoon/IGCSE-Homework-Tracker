@@ -155,9 +155,9 @@ Deno.serve(async (req) => {
   } catch {
     // Sequencing is a nicety. If the model is unavailable, fall back to the
     // conventional ordering (short recall first) rather than failing the whole
-    // request — the questions are the product, not the rubric.
+    // request. The questions are the product, not the rubric.
     plan = {
-      title: body.title ?? `${subject} mock — ${totalMarks} marks`,
+      title: body.title ?? `${subject} mock: ${totalMarks} marks`,
       instructions: defaultRubric(totalMarks, body.durationMin ?? suggestDuration(totalMarks)),
       order: selected.map((c) => c.id),
     };
@@ -225,7 +225,7 @@ function clamp(n: number, lo: number, hi: number): number {
  *
  * "Hence, solve x² + 9x − 22 = 0" is unanswerable without the part above it,
  * and a mock paper that asks it in isolation is not a mock paper. These are
- * dropped rather than reworded — rewording a question is exactly what this
+ * dropped rather than reworded: rewording a question is exactly what this
  * route refuses to do.
  */
 function dependsOnSibling(c: Chunk): boolean {

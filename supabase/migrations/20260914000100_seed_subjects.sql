@@ -1,5 +1,5 @@
 -- ============================================================================
--- Markwise — subject catalogue.
+-- Markwise: subject catalogue.
 --
 -- Codes are the real Cambridge IGCSE syllabus codes, because they are what
 -- paper filenames use (0625_s19_qp_42) and what the ingestion pipeline parses.

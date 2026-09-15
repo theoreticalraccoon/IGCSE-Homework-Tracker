@@ -1,7 +1,7 @@
 /**
  * Ingestion configuration. Read from .env in this directory (see .env.example).
  *
- * The service-role key lives here and nowhere else in the project — it bypasses
+ * The service-role key lives here and nowhere else in the project. It bypasses
  * row-level security, so it must never reach the browser or an edge function
  * that handles user input.
  */
@@ -30,7 +30,7 @@ export const GEMINI_KEYS = need("GEMINI_API_KEYS")
  * Generation models, tried in order.
  *
  * Free-tier quota is per model as well as per key, and the flagship flash
- * model is the most contended — it returns 429/503 far more often than the
+ * model is the most contended. It returns 429/503 far more often than the
  * lite variant. Ingestion is mechanical extraction, not reasoning, so the lite
  * model leads and the others are there to absorb a bad afternoon rather than
  * to do better work.
@@ -47,7 +47,7 @@ export const EMBED_MODEL = process.env.GEMINI_EMBED_MODEL || "gemini-embedding-0
  * 768, not the model's native 3072.
  *
  * gemini-embedding-001 supports Matryoshka truncation, and 768 keeps the
- * pgvector column a quarter of the size with negligible retrieval loss — which
+ * pgvector column a quarter of the size with negligible retrieval loss: which
  * matters because the corpus is hundreds of thousands of rows and Supabase's
  * free tier is 500 MB. Truncated vectors come back un-normalised, so they are
  * normalised before storage (see gemini.js).

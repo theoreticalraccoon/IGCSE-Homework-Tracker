@@ -5,13 +5,13 @@
  *   node smoke-functions.mjs      (from ingest/)
  *
  * Creates a throwaway confirmed user, signs in as them, and exercises ask /
- * mark / mock over HTTP exactly as the browser does — same auth header, same
- * SSE parsing — then deletes the user again. Run it after every deploy: the
+ * mark / mock over HTTP exactly as the browser does: same auth header, same
+ * SSE parsing: then deletes the user again. Run it after every deploy: the
  * unit tests cannot catch a missing secret, a retired model, or an RLS policy
  * that blocks the service.
  *
  * Lives beside the ingestion package because it needs the same Supabase client
- * and the same .env — the service-role key is what lets it create and delete the
+ * and the same .env. The service-role key is what lets it create and delete the
  * throwaway user.
  */
 import { createClient } from "@supabase/supabase-js";
@@ -127,9 +127,9 @@ try {
     const body = await res.json().catch(() => ({}));
     if (!res.ok) { console.log(`   FAIL ${res.status}: ${body.message ?? body.error ?? ""}`); failures++; }
     else {
-      console.log(`   OK  "${body.title}" — ${body.totalMarks} marks, ${body.durationMin} min, ${body.questions?.length} questions`);
+      console.log(`   OK  "${body.title}": ${body.totalMarks} marks, ${body.durationMin} min, ${body.questions?.length} questions`);
       for (const q of (body.questions ?? []).slice(0, 3)) {
-        console.log(`       ${q.n}. [${q.marks}] ${q.paperRef} — ${String(q.text).replace(/\s+/g, " ").slice(0, 60)}`);
+        console.log(`       ${q.n}. [${q.marks}] ${q.paperRef}: ${String(q.text).replace(/\s+/g, " ").slice(0, 60)}`);
       }
       const invented = (body.questions ?? []).filter((q) => !q.chunkId);
       if (invented.length) { console.log(`   FAIL: ${invented.length} question(s) not from the corpus`); failures++; }

@@ -1,5 +1,5 @@
 /**
- * Assistant — one chat for everything you'd ask a tutor.
+ * Assistant. One chat for everything you'd ask a tutor.
  *
  * Ask and "mark my answer" used to be two separate screens with two separate
  * forms, which forced the student to classify their own question before they
@@ -78,7 +78,7 @@ function shell() {
 
       <form class="chat-composer" id="chatForm">
         <textarea id="chatInput" rows="1" data-autofocus
-          placeholder="Ask anything — or paste your answer and say which question it's for."></textarea>
+          placeholder="Ask anything, or paste your answer and say which question it's for."></textarea>
         <button class="chat-send" id="chatSend" type="submit" aria-label="Send">↑</button>
         <button class="btn-ghost small" id="chatStop" type="button" hidden>Stop</button>
       </form>
@@ -201,7 +201,7 @@ function welcome() {
       <div class="chat-welcome">
         <h2>No papers for your subjects yet</h2>
         <p>The assistant answers from real past papers and mark schemes. Only some
-           subjects are loaded so far — pick one of those in Settings, or check back.</p>
+           subjects are loaded so far. Pick one of those in Settings, or check back.</p>
         <button class="btn-ghost" data-goto="settings">Choose subjects</button>
       </div>`;
   }
@@ -211,7 +211,7 @@ function welcome() {
       <h2>What are you working on?</h2>
       <p>
         Everything here is answered out of ${cov ? `${cov.questions.toLocaleString()} real exam questions and their
-        mark schemes` : "real exam questions and their mark schemes"} — not from what a chatbot half-remembers.
+        mark schemes` : "real exam questions and their mark schemes"}. Not from what a chatbot half-remembers.
         Ask about a topic, or paste an answer and say which question it's for.
       </p>
       <div class="chat-prompts">
@@ -248,7 +248,7 @@ function sourceStrip(citations) {
     <div class="sources">
       <p class="sources-title">
         <span class="sources-badge">From the papers</span>
-        Answered using ${citations.length} real question${citations.length === 1 ? "" : "s"} — open any to read it
+        Answered using ${citations.length} real question${citations.length === 1 ? "" : "s"}: open any to read it
       </p>
       <div class="cite-strip">
         ${shown.map((c, i) => `

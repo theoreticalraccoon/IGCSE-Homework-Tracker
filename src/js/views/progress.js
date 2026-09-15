@@ -1,10 +1,10 @@
 /**
- * Progress — what the marking history actually says about this student.
+ * Progress: what the marking history actually says about this student.
  *
  * Every number here comes from marks awarded against real mark schemes, which
  * is why it is worth showing: a topic mastery bar built on a chatbot's opinion
  * of your answer would be noise. Weak topics link straight back into the tools
- * that fix them — a targeted mock, a practice question, a revision task.
+ * that fix them. A targeted mock, a practice question, a revision task.
  */
 
 import { esc, on } from "../ui/dom.js";
@@ -92,7 +92,7 @@ async function load() {
     body.innerHTML = emptyState({
       icon: "📈",
       title: "Nothing marked yet",
-      message: "Answer a past question and have it marked — your topic profile builds itself from there.",
+      message: "Answer a past question and have it marked. Your topic profile builds itself from there.",
       action: `<button class="btn-primary" data-goto="assistant">Mark an answer</button>`,
     });
     return;

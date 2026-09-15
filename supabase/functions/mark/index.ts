@@ -4,13 +4,13 @@
  * Marks one answer against the real mark scheme.
  *
  * Two entry paths, because students arrive two ways:
- *   - chunkId  — they picked the question in the library or a mock. Exact.
- *   - question — they typed or pasted it ("0625 Jun 2019 P42 Q4(b)", or the
+ *   - chunkId. They picked the question in the library or a mock. Exact.
+ *   - question. They typed or pasted it ("0625 Jun 2019 P42 Q4(b)", or the
  *     question text itself). Retrieval finds the paper, and the response says
  *     which question it matched so a wrong match is visible, not silent.
  *
  * The result is written to `attempts`, which the mastery trigger folds into the
- * student's weakness profile — this is the loop that makes every other feature
+ * student's weakness profile. This is the loop that makes every other feature
  * personal.
  *
  * Body: { answer, chunkId? , question?, subject?, mockId? }
@@ -37,7 +37,7 @@ interface Body {
   question?: string | null;
   subject?: string | null;
   mockId?: string | null;
-  /** Skip writing to attempts — used when marking a mock question by question. */
+  /** Skip writing to attempts: used when marking a mock question by question. */
   noRecord?: boolean;
 }
 

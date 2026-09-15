@@ -1,5 +1,5 @@
 /**
- * Mock exams — generate, sit under timer, submit, get marked.
+ * Mock exams: generate, sit under timer, submit, get marked.
  *
  * Three states in one route:
  *   #/mock            the list, and the generator
@@ -130,8 +130,8 @@ function paintGenerator() {
     return;
   }
 
-  // Subject is the only decision. Everything else — how many marks, how long,
-  // which topics — has a sensible answer the student should not have to make
+  // Subject is the only decision. Everything else: how many marks, how long,
+  // which topics: has a sensible answer the student should not have to make
   // up before they can practise.
   slot.innerHTML = `
     <section class="card plain generator">
@@ -228,7 +228,7 @@ async function renderSit(id) {
       <p class="muted">Your answers are saved on this device as you type.</p>
     </div>`;
 
-  // Persist on every keystroke (debounced by the browser's own event pacing —
+  // Persist on every keystroke (debounced by the browser's own event pacing
   // localStorage writes at this size are cheap and losing work is not).
   on(root, "input", ".exam-answer", (_, box) => {
     const current = readDraft(id);
@@ -382,7 +382,7 @@ async function renderMarked(id) {
   const pct = mock.total_marks ? Math.round(((mock.awarded ?? 0) / mock.total_marks) * 100) : 0;
   const band = pct >= 80 ? "good" : pct >= 50 ? "mid" : "poor";
 
-  // Where the marks actually went, by topic — the most useful single view of
+  // Where the marks actually went, by topic. The most useful single view of
   // a finished paper.
   const byTopic = new Map();
   for (const q of questions) {
@@ -484,6 +484,6 @@ function writeDraft(id, data) {
   try {
     localStorage.setItem(draftKey(id), JSON.stringify(data));
   } catch {
-    /* quota or private mode — the paper still works, it just is not saved */
+    /* quota or private mode. The paper still works, it just is not saved */
   }
 }

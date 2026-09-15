@@ -1,7 +1,7 @@
 /**
  * Database writes for the ingestion pipeline.
  *
- * Uses the service-role key, so RLS does not apply — this is the only place in
+ * Uses the service-role key, so RLS does not apply. This is the only place in
  * the project that writes to the corpus tables.
  */
 
@@ -33,7 +33,7 @@ function boardFor(code) {
 /**
  * Ensure a subject row exists so papers can reference it.
  *
- * Auto-created rows are named after their code, which is ugly in the UI — the
+ * Auto-created rows are named after their code, which is ugly in the UI: the
  * caller is told so it can suggest a proper name.
  */
 export async function ensureSubject(code, name = null) {
@@ -51,7 +51,7 @@ export async function ensureSubject(code, name = null) {
 }
 
 /**
- * Upsert a paper row. Returns { paper, unchanged } — unchanged is true when the
+ * Upsert a paper row. Returns { paper, unchanged }. Unchanged is true when the
  * same file (by sha256) is already ingested, letting the caller skip the
  * expensive parse-and-embed entirely.
  */
@@ -89,7 +89,7 @@ export async function upsertPaper(meta, { title, sha256, pages, sourceUrl = null
   if (existing) {
     const { data, error } = await db.from("papers").update(row).eq("id", existing.id).select("id").single();
     if (error) throw new Error(`Paper update failed: ${error.message}`);
-    // Content changed — drop the old chunks so we never serve a stale mix.
+    // Content changed: drop the old chunks so we never serve a stale mix.
     await db.from("chunks").delete().eq("paper_id", existing.id);
     return { paper: data, unchanged: false };
   }
