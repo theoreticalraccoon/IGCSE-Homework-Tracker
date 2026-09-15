@@ -22,7 +22,7 @@ export function renderAuth() {
   screen.innerHTML = `
     <div class="auth-card">
       <div class="brand-lockup">
-        <img src="src/assets/markwise-mark.svg" alt="" width="60" height="60">
+        <img src="src/assets/markwise-mark.svg" alt="" width="72" height="72">
         <span class="brand-name lg">Mark<span>wise</span></span>
       </div>
       <p class="brand-tagline">${esc(APP_TAGLINE)}</p>
