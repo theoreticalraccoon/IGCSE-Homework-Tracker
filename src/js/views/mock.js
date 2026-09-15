@@ -124,8 +124,8 @@ function paintGenerator() {
   if (!grounded.length) {
     slot.innerHTML = emptyState({
       icon: "📥",
-      title: "No papers added yet",
-      message: "Mock papers are built from the past papers you have added, so add a few first.",
+      title: "Nothing loaded for your subjects yet",
+      message: "Mock papers are built from real past papers, which are loaded per subject. Only some are available so far.",
     });
     return;
   }

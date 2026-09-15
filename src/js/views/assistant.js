@@ -14,7 +14,7 @@
 
 import { esc, on, renderMarkdown, scrollToBottom } from "../ui/dom.js";
 import { toast, openModal, closeModal } from "../ui/feedback.js";
-import { groundedSubjects, subjectName, corpusCode } from "../store.js";
+import { groundedSubjects, subjectName, corpusCode, coverageFor } from "../store.js";
 import { loadThreads, createThread, loadMessages, deleteThread, getChunk, weakTopics } from "../api/data.js";
 import { ask, markAnswer, explainError } from "../api/ai.js";
 import { navigate } from "../router.js";
@@ -67,6 +67,7 @@ function shell() {
               : '<option value="">No papers added yet</option>'}
           </select>
         </div>
+        <span class="chat-grounding" id="chatGrounding"></span>
         <div class="chat-tools">
           <button class="btn-ghost small" id="historyBtn">History</button>
           <button class="btn-ghost small" id="newChat">New chat</button>
@@ -94,8 +95,10 @@ function wire() {
 
   select.addEventListener("change", () => {
     state.subject = select.value || null;
+    paintGrounding();
     if (!state.messages.length) paint();
   });
+  paintGrounding();
 
   root.querySelector("#chatForm").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -146,6 +149,24 @@ function wire() {
 
 /* --------------------------------------------------------------- painting -- */
 
+/**
+ * What this subject can actually be answered from.
+ *
+ * Shown permanently rather than buried, because it is the whole claim of the
+ * app: the answers below came out of these documents, and when there are none
+ * the student should see that before they ask rather than after.
+ */
+function paintGrounding() {
+  const el = root?.querySelector("#chatGrounding");
+  if (!el) return;
+  const cov = coverageFor(state.subject);
+  el.innerHTML = cov
+    ? `<span class="dot ok"></span>Reading ${cov.questions.toLocaleString()} real questions
+       from ${cov.papers} past paper${cov.papers === 1 ? "" : "s"}${
+         cov.from_year ? `, ${cov.from_year}–${cov.to_year}` : ""}`
+    : `<span class="dot warn"></span>No papers loaded for this subject`;
+}
+
 function paint() {
   // A streamed reply keeps arriving for a moment after the student navigates
   // away, and by then this view's markup has been replaced by the next one.
@@ -178,17 +199,21 @@ function welcome() {
   if (!grounded.length) {
     return `
       <div class="chat-welcome">
-        <h2>Add some past papers first</h2>
-        <p>The assistant answers from real papers and mark schemes. Once you've added
-           a few it can explain topics, show you how marks are awarded, and mark your work.</p>
-        <button class="btn-primary" data-goto="papers">Add papers</button>
+        <h2>No papers for your subjects yet</h2>
+        <p>The assistant answers from real past papers and mark schemes. Only some
+           subjects are loaded so far — pick one of those in Settings, or check back.</p>
+        <button class="btn-ghost" data-goto="settings">Choose subjects</button>
       </div>`;
   }
+  const cov = coverageFor(state.subject);
   return `
     <div class="chat-welcome">
       <h2>What are you working on?</h2>
-      <p>Ask about a topic, or paste an answer and say which question it's for — it'll be
-         marked against the real mark scheme.</p>
+      <p>
+        Everything here is answered out of ${cov ? `${cov.questions.toLocaleString()} real exam questions and their
+        mark schemes` : "real exam questions and their mark schemes"} — not from what a chatbot half-remembers.
+        Ask about a topic, or paste an answer and say which question it's for.
+      </p>
       <div class="chat-prompts">
         ${PROMPTS.map((p) => `<button class="chip-suggest" data-prompt="${esc(p)}">${esc(p)}</button>`).join("")}
       </div>
@@ -218,12 +243,20 @@ function messageHTML(m, i) {
 
 function sourceStrip(citations) {
   if (!citations?.length) return "";
+  const shown = citations.slice(0, 6);
   return `
-    <div class="cite-strip">
-      ${citations.slice(0, 6).map((c, i) => `
-        <button class="cite-pill" data-source-id="${esc(c.id)}">
-          <span class="cite-n">${i + 1}</span>${esc(c.label)}
-        </button>`).join("")}
+    <div class="sources">
+      <p class="sources-title">
+        <span class="sources-badge">From the papers</span>
+        Answered using ${citations.length} real question${citations.length === 1 ? "" : "s"} — open any to read it
+      </p>
+      <div class="cite-strip">
+        ${shown.map((c, i) => `
+          <button class="cite-pill" data-source-id="${esc(c.id)}">
+            <span class="cite-n">${i + 1}</span>${esc(c.label)}${
+              c.marks ? `<span class="cite-marks">${c.marks} mark${c.marks === 1 ? "" : "s"}</span>` : ""}
+          </button>`).join("")}
+      </div>
     </div>`;
 }
 

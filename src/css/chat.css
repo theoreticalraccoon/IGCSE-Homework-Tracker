@@ -312,3 +312,33 @@
 
 .matched-paper { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
 .matched-paper strong { color: var(--ink); font-weight: 600; }
+
+/* --- the grounding, made visible -----------------------------------------
+   Retrieval is the point of the app, so it is stated in the header and
+   credited under every answer rather than left as a subtle footnote.
+   ------------------------------------------------------------------------ */
+
+.chat-grounding {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; color: var(--muted); line-height: 1.4;
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.ok { background: var(--good); }
+.dot.warn { background: var(--mid); }
+
+.sources {
+  margin-top: 12px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 10px;
+}
+.sources-title {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 11.5px; color: var(--muted); margin: 0 0 8px;
+}
+.sources-badge {
+  background: var(--good-soft); color: var(--good);
+  border-radius: 999px; padding: 2px 9px;
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.cite-marks { font: 10.5px var(--mono); opacity: .7; margin-left: 4px; }

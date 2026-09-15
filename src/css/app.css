@@ -318,17 +318,46 @@ input:focus, select:focus, textarea:focus { border-color: var(--pen); outline: n
   padding: 15px 16px;
   box-shadow: var(--shadow);
 }
+/* Stacked cards need the gap; the board is a grid and already has one. Left in
+   for both, the margin pushed every card except the first down by 14px —
+   which is exactly why the first subject card was taller than its neighbours
+   and sat higher than them. */
 .card + .card { margin-top: 14px; }
+.board .card + .card { margin-top: 0; }
 .card > header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .card > header h2 { flex: 1; }
 .card-head-actions { display: flex; align-items: center; gap: 10px; }
 .card-actions { display: flex; gap: 9px; margin-top: 14px; }
 
 /* the coloured spine that shows a subject's pressure at a glance */
-.card.spine-hw   { border-left: 3px solid var(--pen); }
-.card.spine-as   { border-left: 3px solid var(--mark); }
-.card.spine-both { border-left: 3px solid var(--mark); box-shadow: inset 3px 0 0 -1px var(--pen), var(--shadow); }
-.card.spine-none { border-left: 3px solid var(--line); }
+/* The spine is drawn as a bar inside the card rather than as a left border,
+   because a border can only be one colour. A subject with both homework and
+   an assessment needs both pens on it — blue over red — and the old inset
+   shadow trick rendered a 1px sliver hidden behind the border, so those cards
+   looked identical to assessment-only ones. */
+.card.spine-hw,
+.card.spine-as,
+.card.spine-both,
+.card.spine-none {
+  position: relative;
+  padding-left: 19px;
+}
+.card.spine-hw::before,
+.card.spine-as::before,
+.card.spine-both::before,
+.card.spine-none::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  bottom: -1px;
+  width: 3px;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+.card.spine-hw::before   { background: var(--pen); }
+.card.spine-as::before   { background: var(--mark); }
+.card.spine-both::before { background: linear-gradient(var(--pen) 0 50%, var(--mark) 50% 100%); }
+.card.spine-none::before { background: var(--line); }
 
 .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
 .card-group + .card-group { margin-top: 12px; }

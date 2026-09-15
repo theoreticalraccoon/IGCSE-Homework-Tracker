@@ -43,7 +43,6 @@ export async function render(container) {
     <section class="card plain">
       <header>
         <h2>What you can do today</h2>
-        <button class="link-btn" data-goto="papers">Add papers</button>
       </header>
       <div id="usagePanel">${spinner("Checking…")}</div>
       <p class="field-hint">

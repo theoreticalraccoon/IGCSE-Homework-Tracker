@@ -136,6 +136,10 @@ try {
     if (!box || box.y + box.height > vh + 4) note("assistant", "composer is not on screen");
     if (box && box.y < vh * 0.5) note("assistant", "composer is not at the bottom");
     await page.waitForSelector(".chip-suggest", { timeout: 10000 });
+    const grounding = (await page.locator("#chatGrounding").textContent()) ?? "";
+    if (!/Reading \d/.test(grounding.replace(/\s+/g, " "))) {
+      note("assistant", `header does not state its sources: "${grounding.trim().slice(0, 60)}"`);
+    }
   });
 
   await step("assistant: answers a question", async () => {
@@ -146,6 +150,7 @@ try {
       () => (document.querySelector(".msg.model .bubble")?.textContent ?? "").length > 40,
       null, { timeout: 180000 },
     );
+    await page.waitForSelector(".sources .cite-pill", { timeout: 20000 });
   });
 
   await step("mock: subject is the only input", async () => {
@@ -165,10 +170,33 @@ try {
     if (!disabled) note("markpaper", "Mark button is enabled with nothing uploaded");
   });
 
-  await step("your papers: dropzone and coverage", async () => {
-    await page.click(String.raw`[data-nav="papers"]`);
-    await page.waitForSelector("#pDrop", { timeout: 20000 });
-    await page.waitForSelector("#pCoverage", { timeout: 10000 });
+  await step("no past-paper upload in the student app", async () => {
+    for (const gone of ['[data-nav="papers"]', "#pDrop"]) {
+      if (await page.locator(gone).count()) note("nav", `${gone} is still reachable`);
+    }
+  });
+
+  await step("planner: spines and equal card heights", async () => {
+    await page.click(String.raw`[data-nav="planner"]`);
+    await page.waitForSelector(".board .card", { timeout: 15000 });
+    const rows = await page.$$eval(".board .card", (els) => els.map((e) => {
+      const r = e.getBoundingClientRect();
+      const bar = getComputedStyle(e, "::before");
+      return {
+        top: Math.round(r.top), h: Math.round(r.height),
+        spine: [...e.classList].find((c) => c.startsWith("spine-")),
+        bg: bar.backgroundImage, w: bar.width,
+      };
+    }));
+    const firstRow = rows.filter((r) => r.top === rows[0].top);
+    if (new Set(firstRow.map((r) => r.h)).size > 1) {
+      note("planner", `cards in one row differ in height: ${firstRow.map((r) => r.h).join(", ")}`);
+    }
+    const both = rows.find((r) => r.spine === "spine-both");
+    if (both && !/gradient/.test(both.bg)) {
+      note("planner", "a card with homework and assessments does not show both pens");
+    }
+    if (rows.some((r) => r.w !== "3px")) note("planner", "spine bar missing on some cards");
   });
 
   await step("progress", async () => {

@@ -19,7 +19,6 @@ import * as planner from "./views/planner.js";
 import * as assistant from "./views/assistant.js";
 import * as mock from "./views/mock.js";
 import * as markpaper from "./views/markpaper.js";
-import * as papers from "./views/papers.js";
 import * as progress from "./views/progress.js";
 import * as settings from "./views/settings.js";
 
@@ -27,7 +26,6 @@ defineRoute("planner", planner);
 defineRoute("assistant", assistant);
 defineRoute("mock", mock);
 defineRoute("markpaper", markpaper);
-defineRoute("papers", papers);
 defineRoute("progress", progress);
 defineRoute("settings", settings);
 
@@ -122,7 +120,7 @@ function wireShell() {
     if (!byId("appShell") || byId("appShell").hidden) return;
     if (!byId("modalOverlay").hidden) return;
 
-    const routes = { t: "today", p: "planner", c: "calendar", a: "ask", m: "mark", k: "mock", l: "library", g: "progress" };
+    const routes = { p: "planner", a: "assistant", m: "mock", k: "markpaper", g: "progress" };
     const target = routes[e.key.toLowerCase()];
     if (target) {
       e.preventDefault();

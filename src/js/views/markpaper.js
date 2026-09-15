@@ -161,8 +161,8 @@ function paint() {
     root.innerHTML = root.querySelector(".view-head").outerHTML + emptyState({
       icon: "📄",
       title: "Add a past paper first",
-      message: "Markwise marks against the real mark scheme, so it needs the paper and its mark scheme before it can mark anything.",
-      action: `<button class="btn-primary" data-goto="papers">Add papers</button>`,
+      message: "Marking works against the real mark scheme, so it only covers subjects whose papers are loaded. Pick one of those in Settings.",
+      action: `<button class="btn-ghost" data-goto="settings">Choose subjects</button>`,
     });
     on(root, "click", "[data-goto]", (_, b) => navigate(b.dataset.goto));
     return;
